@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego para 2 Jugadores</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      font-family: sans-serif;
+    }
+    .player {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #000;
+    }
+    h2 {
+      margin: 10px 0;
+    }
+    .score {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    .turn {
+      background-color: #e0ffe0;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="player1" class="player turn">
+    <h2>Jugador 1</h2>
+    <div class="score" id="score1">0</div>
+    <button onclick="tirar(1)">Tirar</button>
+    <button onclick="plantarse(1)">Plantarse</button>
+  </div>
+
+  <div id="player2" class="player">
+    <h2>Jugador 2</h2>
+    <div class="score" id="score2">0</div>
+    <button onclick="tirar(2)">Tirar</button>
+    <button onclick="plantarse(2)">Plantarse</button>
+  </div>
+
+  <script>
+    let scores = [0, 0];
+    let turn = 1;
+    let finished = [false, false];
+
+    function tirar(player) {
+      if (player !== turn || finished[player - 1]) return;
+
+      const roll = Math.floor(Math.random() * 10) + 1;
+      scores[player - 1] += roll;
+      document.getElementById(`score${player}`).textContent = scores[player - 1];
+
+      if (scores[player - 1] > 21) {
+        alert(`Jugador ${player} se pasó. ¡Jugador ${3 - player} gana!`);
+        resetGame();
+      }
+    }
+
+    function plantarse(player) {
+      if (player !== turn || finished[player - 1]) return;
+
+      finished[player - 1] = true;
+      if (finished[0] && finished[1]) {
+        determinarGanador();
+      } else {
+        cambiarTurno();
+      }
+    }
+
+    function cambiarTurno() {
+      document.getElementById(`player${turn}`).classList.remove("turn");
+      turn = 3 - turn;
+      document.getElementById(`player${turn}`).classList.add("turn");
+    }
+
+    function determinarGanador() {
+      const [s1, s2] = scores;
+      let mensaje = "";
+      if (s1 === s2) {
+        mensaje = "¡Empate!";
+      } else if ((s1 > s2 && s1 <= 21) || s2 > 21) {
+        mensaje = "¡Jugador 1 gana!";
+      } else {
+        mensaje = "¡Jugador 2 gana!";
+      }
+      alert(mensaje);
+      resetGame();
+    }
+
+    function resetGame() {
+      scores = [0, 0];
+      turn = 1;
+      finished = [false, false];
+      document.getElementById("score1").textContent = "0";
+      document.getElementById("score2").textContent = "0";
+      document.getElementById("player1").classList.add("turn");
+      document.getElementById("player2").classList.remove("turn");
+    }
+  </script>
+</body>
+</html>
