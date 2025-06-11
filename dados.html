@@ -12,7 +12,7 @@
       align-items: center;
       justify-content: flex-start;
       height: 100vh;
-      background: white;  /* fondo blanco como pediste */
+      background: white;
       padding-top: 20px;
       position: relative;
       overflow-x: hidden;
@@ -32,6 +32,8 @@
       align-items: center;
       justify-content: center;
       margin-bottom: 30px;
+      position: relative;
+      z-index: 20;
     }
 
     button {
@@ -58,6 +60,7 @@
       text-align: center;
       font-weight: bold;
       font-size: 2em;
+      z-index: 10;
     }
 
     .p1 { top: 10px; left: 10px; }
@@ -72,7 +75,9 @@
       justify-content: center;
       margin: 20px 0;
       position: relative;
-      height: 100px; /* espacio para dados */
+      height: 100px; /* suficiente para posicion absoluta de dados */
+      width: 600px;
+      z-index: 15;
     }
 
     .dice {
@@ -80,16 +85,17 @@
       height: 80px;
       object-fit: contain;
       border-radius: 10px;
-      position: relative;
-      z-index: 1;
-      transition: box-shadow 0.3s ease, transform 0.7s ease;
-      cursor: default;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: box-shadow 0.3s ease;
     }
 
     #turno-actual {
       font-weight: bold;
       font-size: 2.5em;
       margin-bottom: 10px;
+      z-index: 20;
     }
 
     #puntos-turno {
@@ -97,32 +103,55 @@
       font-style: italic;
       font-size: 2em;
       text-align: center;
-    }
-
-    /* Nueva caja de resultados */
-    #resultados-tirada {
-      margin-top: 20px;
-      min-height: 90px;
-      width: 600px;
-      border: 2px solid #333;
-      border-radius: 10px;
-      background: #eee;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 10px;
-      justify-content: flex-start;
-      position: relative;
-    }
-
-    /* Resaltados */
-    .resaltado-actual {
-      box-shadow: 0 0 12px 3px #28a745; /* verde */
       z-index: 20;
     }
+
+    /* Caja de resultados debajo de botones */
+    #resultados-tiradas {
+      margin-top: 20px;
+      display: flex;
+      gap: 15px;
+      min-height: 100px;
+      width: 600px;
+      flex-wrap: wrap;
+      justify-content: center;
+      border: 2px solid #333;
+      padding: 10px;
+      border-radius: 10px;
+      background: #fafafa;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Dados en resultados */
+    .dice-result {
+      width: 60px !important;
+      height: 60px !important;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      box-shadow: 0 0 10px 4px green;
+      border-radius: 10px;
+      margin: 0 5px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    /* Clases para colores de tirada */
+    .color1 { box-shadow: 0 0 15px 4px #4CAF50 !important; }
+    .color2 { box-shadow: 0 0 15px 4px #2196F3 !important; }
+    .color3 { box-shadow: 0 0 15px 4px #FF9800 !important; }
+    .color4 { box-shadow: 0 0 15px 4px #9C27B0 !important; }
+    .color5 { box-shadow: 0 0 15px 4px #E91E63 !important; }
+    .color6 { box-shadow: 0 0 15px 4px #00BCD4 !important; }
+
+    /* Dados resaltados en la tirada actual (verde) */
+    .resaltado-actual {
+      box-shadow: 0 0 15px 4px #4CAF50 !important;
+    }
+
+    /* Dados resaltados de tiradas anteriores (azul) */
     .resaltado-previo {
-      box-shadow: 0 0 12px 3px #007bff; /* azul */
-      z-index: 15;
+      box-shadow: 0 0 15px 4px #2196F3 !important;
     }
 
   </style>
@@ -147,8 +176,8 @@
 
   <div id="puntos-turno"></div>
 
-  <!-- Caja para dados puntuados -->
-  <div id="resultados-tirada" title="Dados puntuados de esta y anteriores tiradas"></div>
+  <!-- Caja donde se muestran dados puntuados -->
+  <div id="resultados-tiradas"></div>
 
 <script>
   let jugadores = 0;
@@ -157,11 +186,11 @@
   let puntosTurno = 0;
   let dadosRestantes = 6;
 
-  // Para guardar los dados puntuados previos (clones)
-  let dadosPuntuadosPrevios = [];
+  let tiradaNumero = 0; // para colorear tiradas
+  let coloresTiradas = ["color1","color2","color3","color4","color5","color6"];
 
-  // Para asignar color diferente a cada tirada
-  let tiradaContador = 0;
+  // Guardamos dados resaltados anteriores para cambiar color
+  let dadosResaltadosPrevios = [];
 
   function selectPlayers(count) {
     jugadores = count;
@@ -191,12 +220,25 @@
     const contenedor = document.getElementById("dados");
     contenedor.innerHTML = "";
 
-    valores.forEach((valor) => {
+    valores.forEach((valor, idx) => {
+      const dadoWrapper = document.createElement("div");
+      dadoWrapper.style.position = "relative";
+      dadoWrapper.style.width = "80px";
+      dadoWrapper.style.height = "80px";
+
+      // Posición relativa para animación
+      // Vamos a ponerlos en fila con separación horizontal y posición absoluta para animación
+      dadoWrapper.style.position = "absolute";
+      dadoWrapper.style.left = `${idx * 90}px`;
+      dadoWrapper.style.top = `0`;
+
       const img = document.createElement("img");
       img.src = `img/dice${valor}.png`;
       img.alt = `Dado ${valor}`;
       img.className = "dice";
-      contenedor.appendChild(img);
+
+      dadoWrapper.appendChild(img);
+      contenedor.appendChild(dadoWrapper);
     });
   }
 
@@ -207,10 +249,12 @@
     video.style.position = "absolute";
     video.style.top = "0";
     video.style.left = "0";
-    video.style.width = "100px";    // ancho aumentado para recortar
-    video.style.height = "80px";    // altura dado
+    video.style.width = "100px";
+    video.style.height = "80px";
     video.style.zIndex = "10";
-    video.style.clipPath = "inset(0 0 0 0)";
+
+    // Recortar 10px a cada lado para que el área visible sea 80px ancho x 80px alto
+    video.style.clipPath = "inset(0 10px 0 10px)";
 
     dadoWrapper.appendChild(video);
 
@@ -237,206 +281,198 @@
     };
   }
 
-  // Función para detectar qué dados puntúan y cuáles no (igual que antes)
-  function calcularPuntos(dados) {
-    let puntos = 0;
-    let cuenta = {};
-    dados.forEach(d => cuenta[d] = (cuenta[d] || 0) + 1);
-
-    let dadosUtiles = 0;
-
-    for (let i = 1; i <= 6; i++) {
-      const cantidad = cuenta[i] || 0;
-      if (cantidad >= 3) {
-        puntos += i === 1 ? 300 : i * 100;
-        dadosUtiles += 3;
-        if (cantidad >= 4) { puntos += 1000; dadosUtiles += 1; }
-        if (cantidad === 5) { puntos += 1000; dadosUtiles += 1; }
-      }
-    }
-
-    puntos += (cuenta[1] || 0) < 3 ? (cuenta[1] || 0) * 100 : 0;
-    puntos += (cuenta[5] || 0) < 3 ? (cuenta[5] || 0) * 50 : 0;
-    dadosUtiles += (cuenta[1] || 0) < 3 ? (cuenta[1] || 0) : 0;
-    dadosUtiles += (cuenta[5] || 0) < 3 ? (cuenta[5] || 0) : 0;
-
-    return { puntos, dadosUtiles };
-  }
-
-  // Lanzar dados (simplificado)
   function lanzarDados() {
     if (dadosRestantes <= 0) {
       alert("No quedan dados para lanzar. Plantate o reinicia el turno.");
       return;
     }
+    const cantidad = dadosRestantes;
+    const dados = Array.from({ length: cantidad }, () => Math.floor(Math.random() * 6) + 1);
 
-    // Generar tirada random
-    let tirada = [];
-    for (let i = 0; i < dadosRestantes; i++) {
-      tirada.push(Math.floor(Math.random() * 6) + 1);
-    }
+    const contenedor = document.getElementById("dados");
+    contenedor.style.display = "block";
+    mostrarDados(dados);
 
-    mostrarDados(tirada);
+    let animacionesPendientes = cantidad;
 
-    // Animar cada dado
-    const contenedorDados = document.getElementById("dados");
-    let videosTerminados = 0;
-    for (let i = 0; i < contenedorDados.children.length; i++) {
-      animarDado(contenedorDados.children[i], () => {
-        videosTerminados++;
-        if (videosTerminados === contenedorDados.children.length) {
-          // tras animar, calcular puntos y mostrar resultado
-          const { puntos, dadosUtiles } = calcularPuntos(tirada);
-          puntosTurno += puntos;
-          dadosRestantes -= dadosUtiles;
-
-          document.getElementById("puntos-turno").textContent = `Puntos turno: ${puntosTurno}`;
-
-          // Esperar 1 segundo y mover dados puntuados a box resultados
+    for (let i = 0; i < cantidad; i++) {
+      const dadoWrapper = contenedor.children[i];
+      animarDado(dadoWrapper, () => {
+        animacionesPendientes--;
+        if (animacionesPendientes === 0) {
+          // Esperar 1 segundo antes de mover dados puntuados
           setTimeout(() => {
-            moverDadosPuntuados(tirada);
+            procesarPuntos(dados);
+            moverDadosPuntuados(dados);
           }, 1000);
         }
       });
     }
   }
 
-  // Función que resalta y mueve dados puntuados a la caja resultados
-  function moverDadosPuntuados(tirada) {
-    tiradaContador++;
+  function procesarPuntos(dados) {
+    const { puntos, dadosUtiles } = calcularPuntos(dados);
+    if (puntos === 0) {
+      alert("¡Sin puntos! Turno perdido.");
+      puntosTurno = 0;
+      pasarTurno();
+    } else {
+      puntosTurno += puntos;
+      dadosRestantes = dados.length - dadosUtiles;
+      if (dadosRestantes === 0) dadosRestantes = 6; // Si usaste todos, vuelves a 6
+      document.getElementById("puntos-turno").textContent = `Puntos este turno: ${puntosTurno}`;
+    }
+  }
 
-    const contenedorResultados = document.getElementById("resultados-tirada");
+  // Calcula puntos y devuelve cuántos dados son útiles para puntuar
+  function calcularPuntos(dados) {
+    // Contar dados
+    let contador = [0,0,0,0,0,0,0]; // indices 1-6
+    dados.forEach(d => contador[d]++);
+    let puntos = 0;
+    let dadosUtiles = 0;
 
-    // Crear contenedor para esta tirada
-    const tiradaDiv = document.createElement("div");
-    tiradaDiv.style.display = "flex";
-    tiradaDiv.style.gap = "10px";
-    tiradaDiv.style.marginRight = "15px";
-    tiradaDiv.style.alignItems = "center";
+    // Comprobar escalera 1-6
+    if (contador.slice(1).every(c => c === 1)) {
+      puntos += 1500;
+      dadosUtiles = 6;
+      return { puntos, dadosUtiles };
+    }
 
-    // Dado para cada valor en tirada, pero solo los puntuados (usamos misma lógica que calcularPuntos para saber cuáles resaltamos)
-    // Vamos a repetir la lógica para determinar dados puntuados
-
-    // Primero contar repeticiones
-    let cuenta = {};
-    tirada.forEach(d => cuenta[d] = (cuenta[d] || 0) + 1);
-
-    // Función para marcar dados que puntúan
-    // Esto es una aproximación simple, puedes adaptar la lógica según las reglas de puntuación
-
-    let dadosPuntuados = [];
-
-    // Prioridad: tríos y más
-    for (let num = 1; num <= 6; num++) {
-      if ((cuenta[num] || 0) >= 3) {
-        for(let i = 0; i < 3; i++) dadosPuntuados.push(num);
-        if ((cuenta[num] || 0) > 3) {
-          for(let i = 3; i < cuenta[num]; i++) dadosPuntuados.push(num);
+    // Tríos, cuartetos, quintetos, sextetos
+    for (let i = 1; i <= 6; i++) {
+      if (contador[i] >= 3) {
+        if (i === 1) {
+          puntos += (contador[i] === 3) ? 1000 : 1000 * 2**(contador[i]-3);
+        } else {
+          puntos += i * 100 * 2**(contador[i]-3);
         }
+        dadosUtiles += contador[i];
+        contador[i] = 0;
       }
     }
 
-    // Ahora añadir unos y cincos que no estén en trios
-    for(let i = 0; i < (cuenta[1] || 0); i++) {
-      if (!dadosPuntuados.includes(1)) dadosPuntuados.push(1);
+    // 1 sueltos
+    if (contador[1] > 0) {
+      puntos += contador[1] * 100;
+      dadosUtiles += contador[1];
     }
-    for(let i = 0; i < (cuenta[5] || 0); i++) {
-      if (!dadosPuntuados.includes(5)) dadosPuntuados.push(5);
-    }
-
-    // Para esta demo, simplificamos: dados puntuados son todos, porque la lógica es compleja. 
-    // Mejor usar el array tirada filtrado por dados puntuados que calculamos con el cálculo de puntos.
-
-    // Vamos a simplificar y marcar todos los dados que aportan puntos: todos dados de la tirada que sumen puntos según reglas.
-
-    // Mejor usar la función calcularPuntos para obtener dados que puntúan y su cantidad:
-    let cuentaPuntuados = {};
-    let { dadosUtiles } = calcularPuntos(tirada);
-
-    // Para animación y visualización, vamos a hacer que todos los dados que están en la tirada sean "clonados" y enviados a la caja,
-    // pero resaltaremos sólo los puntuados.
-
-    // Por simplicidad: vamos a enviar todos los dados y resaltar los puntuados, para que coincida con lo que pediste.
-    // En realidad se debería distinguir los dados puntuados y solo esos moverlos, pero para mantenerlo claro:
-
-    // Crear clones para dados puntuados (solo)
-    // Para eso identificamos cuáles dados puntúan, en base a la función calcularPuntos, para demo vamos a marcar dados 1,5 y tríos.
-
-    // Para la demo, lo hacemos así:
-    // Dados puntuados: todos dados que sean 1, 5, o parte de tríos.
-
-    // Cuenta dados para tríos:
-    let dadosParaResaltar = [];
-
-    // Añadir tríos
-    for (let num = 1; num <=6; num++) {
-      if ((cuenta[num] || 0) >=3) {
-        for (let i=0; i < cuenta[num]; i++) dadosParaResaltar.push(num);
-      }
+    // 5 sueltos
+    if (contador[5] > 0) {
+      puntos += contador[5] * 50;
+      dadosUtiles += contador[5];
     }
 
-    // Añadir unos y cincos que no están en tríos
-    for (let i=0; i < (cuenta[1] || 0); i++) {
-      if (!dadosParaResaltar.includes(1)) dadosParaResaltar.push(1);
-    }
-    for (let i=0; i < (cuenta[5] || 0); i++) {
-      if (!dadosParaResaltar.includes(5)) dadosParaResaltar.push(5);
-    }
+    return { puntos, dadosUtiles };
+  }
 
-    // Ahora filtramos para que dados puntuados sean los dados que suman puntos, eliminando duplicados
-    dadosParaResaltar = [...new Set(dadosParaResaltar)];
+  // Mover dados puntuados a caja resultados con animación y color
+  function moverDadosPuntuados(dados) {
+    const resultados = document.getElementById("resultados-tiradas");
 
-    // Para cada dado en tirada, si está en dadosParaResaltar, se resalta y se mueve a resultados
-    tirada.forEach(valor => {
-      if (dadosParaResaltar.includes(valor)) {
-        const clone = document.createElement("img");
-        clone.src = `img/dice${valor}.png`;
-        clone.className = "dice resaltado-actual";
-        clone.style.width = "60px";
-        clone.style.height = "60px";
-        clone.style.borderRadius = "10px";
-        clone.style.marginRight = "8px";
+    // Color de esta tirada
+    tiradaNumero = (tiradaNumero + 1) % coloresTiradas.length;
+    const claseColor = coloresTiradas[tiradaNumero];
 
-        tiradaDiv.appendChild(clone);
-      }
-    });
-
-    // Añadir tiradaDiv a resultados
-    contenedorResultados.appendChild(tiradaDiv);
-
-    // Cambiar clase dados previos a azul y los actuales a verde
-    dadosPuntuadosPrevios.forEach(img => {
+    // Cambiar dados resaltados previos a color previo
+    dadosResaltadosPrevios.forEach(img => {
       img.classList.remove("resaltado-actual");
       img.classList.add("resaltado-previo");
     });
+    dadosResaltadosPrevios = [];
 
-    // Actualizamos array dadosPuntuadosPrevios con los actuales (los hijos del tiradaDiv)
-    dadosPuntuadosPrevios = Array.from(tiradaDiv.children);
+    // Identificar dados puntuados (tríos, 1 y 5, escalera)
+    // Usamos la función calcularPuntos para saber cuántos dados puntúan
+    let { dadosUtiles } = calcularPuntos(dados);
+
+    if (dadosUtiles === 0) return; // Nada que mover
+
+    // Extraer dados puntuados - como ejemplo vamos a mover los primeros dadosUtiles dados puntuados
+    // Nota: en casos más complejos deberíamos identificar cuáles dados exactamente puntúan (ej. 1,5, tríos)
+    // Para simplicidad, asumimos que los primeros dadosUtiles dados puntúan.
+
+    const dadosPuntuados = dados.slice(0, dadosUtiles);
+
+    // Para cada dado puntuado, crear clon, posicionarlo encima, animar hacia resultados
+    const contenedorDados = document.getElementById("dados");
+
+    dadosPuntuados.forEach((valor, idx) => {
+      // Encontrar la imagen original en contenedor dados (ya que es absoluta)
+      const dadoOriginal = contenedorDados.children[idx].querySelector("img");
+
+      // Obtener posición en pantalla
+      const rectOriginal = dadoOriginal.getBoundingClientRect();
+
+      // Crear clon
+      const clone = dadoOriginal.cloneNode();
+      clone.classList.add("dice-result", "resaltado-actual", claseColor);
+
+      // Posicionar clon en la misma posición absoluta (relativo a viewport)
+      clone.style.position = "fixed";
+      clone.style.top = `${rectOriginal.top}px`;
+      clone.style.left = `${rectOriginal.left}px`;
+      clone.style.margin = "0";
+      clone.style.zIndex = 1000;
+
+      document.body.appendChild(clone);
+
+      // Objetivo: posición dentro del contenedor resultados
+      // Calculamos posición del contenedor resultados + offset según cuantos hijos ya tiene
+      const rectResultados = resultados.getBoundingClientRect();
+      // Dejar margen 10px a la izquierda + ancho dado * número de dados ya en resultados
+      const offsetX = rectResultados.left + 10 + resultados.children.length * 65;
+      const offsetY = rectResultados.top + 20;
+
+      // Animar con transición CSS y transform
+      // Necesitamos calcular delta X e Y
+      const deltaX = offsetX - rectOriginal.left;
+      const deltaY = offsetY - rectOriginal.top;
+
+      // Forzar reflow para transición
+      clone.style.transition = "transform 1s ease";
+      requestAnimationFrame(() => {
+        clone.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+      });
+
+      // Cuando termina la transición, insertarlo en contenedor resultados y limpiar estilos para adaptarse al layout
+      clone.addEventListener("transitionend", () => {
+        clone.style.position = "relative";
+        clone.style.top = "auto";
+        clone.style.left = "auto";
+        clone.style.transform = "none";
+        clone.style.transition = "none";
+        clone.style.zIndex = "auto";
+        resultados.appendChild(clone);
+
+        // Guardar para cambiar clase en siguientes tiradas
+        dadosResaltadosPrevios.push(clone);
+      }, { once: true });
+    });
   }
 
-  // Plantarse: finaliza turno
   function plantarse() {
+    // Guardar puntos
     puntuaciones[turno] += puntosTurno;
-
-    // Actualizar marcador
     document.getElementById(`jugador${turno}`).textContent = `Jugador ${turno + 1}: ${puntuaciones[turno]}`;
-
-    // Limpiar caja resultados
-    document.getElementById("resultados-tirada").innerHTML = "";
-    dadosPuntuadosPrevios = [];
 
     // Reset puntos turno y dados
     puntosTurno = 0;
     dadosRestantes = 6;
+    document.getElementById("puntos-turno").textContent = "";
+
+    // Limpiar caja resultados
+    const resultados = document.getElementById("resultados-tiradas");
+    resultados.innerHTML = "";
+    dadosResaltadosPrevios = [];
 
     // Cambiar turno
     turno = (turno + 1) % jugadores;
     mostrarTurno();
 
-    document.getElementById("dados").innerHTML = "";
-    document.getElementById("puntos-turno").textContent = "";
+    // Limpiar dados para próxima tirada
+    const contenedorDados = document.getElementById("dados");
+    contenedorDados.innerHTML = "";
   }
-
 </script>
 
 </body>
