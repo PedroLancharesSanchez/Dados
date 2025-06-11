@@ -1,27 +1,25 @@
-// Reproducir sonido al hacer clic en cualquier botón
 document.addEventListener("DOMContentLoaded", () => {
-  const clickSound = new Audio("click.mp3"); // Asegúrate de tener este archivo en tu proyecto
+  const clickSound = new Audio("click.mp3");
 
   document.querySelectorAll("button").forEach(button => {
     button.addEventListener("click", () => {
       clickSound.currentTime = 0;
-      clickSound.play();
+      clickSound.play().catch(() => {});
     });
   });
 });
 
-// Animación y sonido al tirar dados
 function reproducirAnimacionLanzamiento() {
   const dados = document.querySelectorAll(".dice");
-  const sonidoLanzar = new Audio("lanzar-dados.mp3"); // Asegúrate de tener este archivo
-  sonidoLanzar.play();
+  const sonidoLanzar = new Audio("lanzar-dados.mp3");
+  sonidoLanzar.play().catch(() => {});
 
   dados.forEach(dado => {
-    dado.style.transform = "rotate(0deg)";
-    dado.style.transition = "transform 0.5s ease";
+    dado.style.transition = "transform 0.3s ease";
+    dado.style.transform = "scale(1.2) rotate(0deg)";
 
     setTimeout(() => {
-      dado.style.transform = `rotate(${Math.floor(Math.random() * 360)}deg)`;
-    }, 50);
+      dado.style.transform = `scale(1) rotate(${Math.random() * 360}deg)`;
+    }, 100);
   });
 }
