@@ -138,6 +138,7 @@
       const cantidad = dadosRestantes;
       const dados = Array.from({ length: cantidad }, () => Math.floor(Math.random() * 6) + 1);
       mostrarDados(dados);
+      reproducirAnimacionLanzamiento();
       const { puntos, dadosUtiles } = calcularPuntos(dados);
       if (puntos === 0) {
         alert("¡Sin puntos! Turno perdido.");
@@ -221,6 +222,6 @@
       return { puntos, dadosUtiles };
     }
   </script>
-
+<script src="efectos.js"></script>
 </body>
 </html>
