@@ -194,7 +194,7 @@
 
       function ajustarDuracion() {
         // Ajustamos playbackRate para que el video dure 0.5s menos que el audio
-        const nuevaDuracion = sonido.duration - 1.5;
+        const nuevaDuracion = sonido.duration - 2.5;
         video.playbackRate = video.duration / nuevaDuracion;
         video.play().catch(() => {});
         sonido.play().catch(() => {});
