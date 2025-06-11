@@ -12,7 +12,7 @@
       align-items: center;
       justify-content: flex-start;
       height: 100vh;
-      background: #f0f0f0;
+      background: white;  /* Fondo blanco */
       padding-top: 20px;
       position: relative;
       overflow-x: hidden;
@@ -180,11 +180,13 @@
     video.style.height = "80px";
     video.style.zIndex = "10";
 
+    // Recortar un 8% de cada lado horizontalmente para eliminar marcas negras
+    video.style.clipPath = "inset(0 8% 0 8%)";
+
     dadoWrapper.appendChild(video);
 
     const sonido = new Audio("sounds/lanzar-dados.mp3");
 
-    // Esperar a cargar metadatos para sincronizar duraciones
     sonido.addEventListener("loadedmetadata", () => {
       if (video.readyState >= 2) {
         ajustarDuracion();
@@ -193,8 +195,7 @@
       }
 
       function ajustarDuracion() {
-        // Ajustamos playbackRate para que el video dure 0.5s menos que el audio
-        const nuevaDuracion = sonido.duration - 2.5;
+        const nuevaDuracion = sonido.duration - 0.5;
         video.playbackRate = video.duration / nuevaDuracion;
         video.play().catch(() => {});
         sonido.play().catch(() => {});
