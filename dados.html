@@ -74,15 +74,15 @@
       border-radius: 10px;
       background: white;
       box-shadow: 0 0 8px #bbb;
-      transition: transform 0.3s ease;
+      transition: transform 0.5s ease;
     }
     .dice img.usado {
       outline: 4px solid #4caf50;
-      animation: usadoAnim 2s ease;
+      animation: usadoAnim 2.5s ease;
     }
     .dice img.no-usado {
       opacity: 0.3;
-      animation: noUsadoAnim 2s ease forwards;
+      animation: noUsadoAnim 2.5s ease forwards;
     }
     button {
       margin: 12px;
@@ -104,20 +104,40 @@
       opacity: 0.6;
     }
 
+    .mensaje-animado {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(220, 0, 0, 0.9);
+      color: white;
+      padding: 20px 40px;
+      font-size: 2em;
+      border-radius: 10px;
+      opacity: 0;
+      pointer-events: none;
+      animation: aparecerDesaparecer 2.5s ease-out forwards;
+      z-index: 1000;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes usadoAnim {
       0% { transform: scale(1); }
       50% { transform: scale(1.2); }
       100% { transform: scale(1); }
     }
-
     @keyframes noUsadoAnim {
       0% { opacity: 1; }
       100% { opacity: 0; transform: scale(0.5); }
+    }
+    @keyframes aparecerDesaparecer {
+      0% { transform: translate(-50%, -60%) scale(0.8); opacity: 0; }
+      10% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      100% { transform: translate(-50%, -40%) scale(1.1); opacity: 0; }
     }
   </style>
 </head>
@@ -149,10 +169,12 @@
     </div>
   </div>
 
-  <!-- Audios -->
+  <div id="mensaje" class="mensaje-animado"></div>
+
   <audio id="sound-roll" src="sounds/roll.mp3"></audio>
   <audio id="sound-win" src="sounds/win.mp3"></audio>
   <audio id="sound-turn" src="sounds/turn.mp3"></audio>
+  <audio id="sound-fail" src="sounds/fail.mp3"></audio>
 
   <script>
     let totals = [0, 0];
@@ -165,10 +187,20 @@
     const soundRoll = document.getElementById("sound-roll");
     const soundWin = document.getElementById("sound-win");
     const soundTurn = document.getElementById("sound-turn");
+    const soundFail = document.getElementById("sound-fail");
 
     function playSound(sound) {
       sound.currentTime = 0;
       sound.play();
+    }
+
+    function mostrarMensajeAnimado(texto, sonido = null) {
+      const mensajeDiv = document.getElementById("mensaje");
+      mensajeDiv.textContent = texto;
+      mensajeDiv.style.animation = "none";
+      void mensajeDiv.offsetWidth;
+      mensajeDiv.style.animation = null;
+      if (sonido) playSound(sonido);
     }
 
     function actualizarTurnoContador() {
@@ -186,7 +218,6 @@
     function mostrarDados(player, dados, usados = []) {
       const diceDiv = document.getElementById(`dice${player}`);
       diceDiv.innerHTML = "";
-
       dados.forEach(d => {
         const img = document.createElement("img");
         img.src = imgPath(d);
@@ -225,7 +256,7 @@
         mostrarDados(player, dados, []);
         setButtonsEnabled(false);
         setTimeout(() => {
-          alert(`Jugador ${player} no ha puntuado. ¡Pierde los puntos del turno!`);
+          mostrarMensajeAnimado(`Jugador ${player} pierde los puntos del turno`, soundFail);
           current[player - 1] = 0;
           cambiarTurno();
           setButtonsEnabled(true);
@@ -245,7 +276,7 @@
         dadosRestantes[player - 1] = restantes;
         document.getElementById(`restantes${player}`).textContent = `Dados restantes: ${restantes}`;
 
-        if (mensaje) alert(mensaje);
+        if (mensaje) mostrarMensajeAnimado(mensaje);
         setButtonsEnabled(true);
       }, 2000);
     }
@@ -320,19 +351,10 @@
 
       for (let num = 1; num <= 6; num++) {
         let count = conteo[num] || 0;
-
-        if (count >= 6) {
-          return { puntos: 0, usados: dados, win: true };
-        } else if (count === 5) {
-          puntos += 2000;
-          usados.push(...Array(5).fill(num));
-        } else if (count === 4) {
-          puntos += 1000;
-          usados.push(...Array(4).fill(num));
-        } else if (count === 3) {
-          puntos += (num === 1 ? 300 : num * 100);
-          usados.push(...Array(3).fill(num));
-        }
+        if (count >= 6) return { puntos: 0, usados: dados, win: true };
+        else if (count === 5) { puntos += 2000; usados.push(...Array(5).fill(num)); }
+        else if (count === 4) { puntos += 1000; usados.push(...Array(4).fill(num)); }
+        else if (count === 3) { puntos += (num === 1 ? 300 : num * 100); usados.push(...Array(3).fill(num)); }
       }
 
       for (let num of [1, 5]) {
