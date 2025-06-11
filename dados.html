@@ -10,24 +10,26 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       height: 100vh;
       background: #f0f0f0;
+      padding-top: 40px;
       position: relative;
     }
 
     h1 {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     .player-select {
       display: flex;
       gap: 20px;
+      margin-bottom: 30px;
     }
 
     button {
       padding: 10px 20px;
-      font-size: 1.2em;
+      font-size: 1.1em;
       cursor: pointer;
     }
 
@@ -46,6 +48,40 @@
     .p2 { top: 10px; right: 10px; }
     .p3 { bottom: 10px; left: 10px; }
     .p4 { bottom: 10px; right: 10px; }
+
+    .dice-container {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .dice {
+      width: 50px;
+      height: 50px;
+      background: white;
+      border: 2px solid black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      border-radius: 5px;
+    }
+
+    .controls {
+      display: none;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    #turno-actual {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    #puntos-turno {
+      margin-top: 10px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -57,24 +93,132 @@
     <button onclick="selectPlayers(4)">4 Jugadores</button>
   </div>
 
-  <script>
-    function selectPlayers(count) {
-      const buttons = document.querySelectorAll("button");
-      buttons.forEach(btn => btn.disabled = true);
+  <div id="turno-actual"></div>
 
+  <div class="dice-container" id="dados"></div>
+
+  <div class="controls">
+    <button onclick="lanzarDados()">🎲 Lanzar Dados</button>
+    <button onclick="plantarse()">✋ Plantarse</button>
+  </div>
+
+  <div id="puntos-turno"></div>
+
+  <script>
+    let jugadores = 0;
+    let puntuaciones = [];
+    let turno = 0;
+    let puntosTurno = 0;
+    let dadosRestantes = 6;
+
+    function selectPlayers(count) {
+      jugadores = count;
+      puntuaciones = Array(count).fill(0);
+      document.querySelectorAll(".player-select button").forEach(btn => btn.disabled = true);
       document.querySelector("h1").textContent = `${count} Jugadores seleccionados`;
 
-      const positions = ["p1", "p2", "p3", "p4"];
+      const posiciones = ["p1", "p2", "p3", "p4"];
       for (let i = 0; i < count; i++) {
-        const scoreDiv = document.createElement("div");
-        scoreDiv.classList.add("score", positions[i]);
-        scoreDiv.id = `jugador${i + 1}`;
-        scoreDiv.textContent = `Jugador ${i + 1}: 0`;
-        document.body.appendChild(scoreDiv);
+        const marcador = document.createElement("div");
+        marcador.className = `score ${posiciones[i]}`;
+        marcador.id = `jugador${i}`;
+        marcador.textContent = `Jugador ${i + 1}: 0`;
+        document.body.appendChild(marcador);
       }
 
-      // Aquí se puede llamar a iniciar el juego
-      // iniciarJuego();
+      document.querySelector(".controls").style.display = "flex";
+      mostrarTurno();
+    }
+
+    function mostrarTurno() {
+      document.getElementById("turno-actual").textContent = `Turno de Jugador ${turno + 1}`;
+    }
+
+    function lanzarDados() {
+      const cantidad = dadosRestantes;
+      const dados = Array.from({ length: cantidad }, () => Math.floor(Math.random() * 6) + 1);
+      mostrarDados(dados);
+      const { puntos, dadosUtiles } = calcularPuntos(dados);
+      if (puntos === 0) {
+        alert("¡Sin puntos! Turno perdido.");
+        puntosTurno = 0;
+        pasarTurno();
+      } else {
+        puntosTurno += puntos;
+        dadosRestantes = cantidad - dadosUtiles;
+        if (dadosRestantes === 0) {
+          dadosRestantes = 6; // puede volver a tirar con todos
+        }
+        document.getElementById("puntos-turno").textContent = `Puntos en este turno: ${puntosTurno}`;
+      }
+    }
+
+    function plantarse() {
+      puntuaciones[turno] += puntosTurno;
+      actualizarMarcadores();
+      puntosTurno = 0;
+      dadosRestantes = 6;
+      pasarTurno();
+    }
+
+    function pasarTurno() {
+      turno = (turno + 1) % jugadores;
+      dadosRestantes = 6;
+      mostrarTurno();
+      document.getElementById("puntos-turno").textContent = "";
+      document.getElementById("dados").innerHTML = "";
+    }
+
+    function actualizarMarcadores() {
+      for (let i = 0; i < jugadores; i++) {
+        document.getElementById(`jugador${i}`).textContent = `Jugador ${i + 1}: ${puntuaciones[i]}`;
+      }
+    }
+
+    function mostrarDados(valores) {
+      const contenedor = document.getElementById("dados");
+      contenedor.innerHTML = "";
+      valores.forEach(valor => {
+        const d = document.createElement("div");
+        d.className = "dice";
+        d.textContent = valor;
+        contenedor.appendChild(d);
+      });
+    }
+
+    function calcularPuntos(dados) {
+      let puntos = 0;
+      let cuenta = {};
+      dados.forEach(d => cuenta[d] = (cuenta[d] || 0) + 1);
+
+      let dadosUtiles = 0;
+
+      for (let i = 1; i <= 6; i++) {
+        const cantidad = cuenta[i] || 0;
+        if (cantidad >= 3) {
+          if (i === 1) {
+            puntos += 300;
+          } else {
+            puntos += i * 100;
+          }
+          dadosUtiles += 3;
+          if (cantidad >= 4) {
+            puntos += 1000;
+            dadosUtiles += 1;
+          }
+          if (cantidad === 5) {
+            puntos += 1000;
+            dadosUtiles += 1;
+          }
+        }
+      }
+
+      puntos += (cuenta[1] || 0) < 3 ? (cuenta[1] || 0) * 100 : 0;
+      puntos += (cuenta[5] || 0) < 3 ? (cuenta[5] || 0) * 50 : 0;
+      dadosUtiles += (cuenta[1] || 0) < 3 ? (cuenta[1] || 0) : 0;
+      dadosUtiles += (cuenta[5] || 0) < 3 ? (cuenta[5] || 0) : 0;
+
+      return { puntos, dadosUtiles };
     }
   </script>
 
