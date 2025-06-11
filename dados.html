@@ -1,473 +1,82 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Juego de Dados</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
       margin: 0;
-      padding: 0;
       font-family: sans-serif;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
       height: 100vh;
-      overflow: hidden;
       background: #f0f0f0;
+      position: relative;
     }
-    .turno-contador {
-      font-size: 2em;
-      text-align: center;
-      padding: 10px;
-      background: #333;
-      color: white;
-      font-weight: bold;
+
+    h1 {
+      margin-bottom: 20px;
     }
-    .player {
-      flex: 1;
+
+    .player-select {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      border-top: 2px solid #000;
-      border-bottom: 2px solid #000;
-      overflow: hidden;
-      transition: background-color 0.5s ease;
+      gap: 20px;
     }
-    .content {
-      transform: rotate(90deg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      animation: fadeIn 0.5s ease-in;
-    }
-    .turn {
-      background-color: #e0ffe0;
-      box-shadow: 0 0 15px 5px #4caf50aa;
-    }
-    h2 {
-      font-size: 2em;
-      margin: 10px 0;
-    }
-    .score, .total, .dados-restantes {
-      font-size: 1.8em;
-      margin: 5px 0;
-    }
-    .total {
-      font-weight: bold;
-      font-size: 2.2em;
-    }
-    .dice {
-      margin: 10px 0;
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-    }
-    .dice img {
-      width: 60px;
-      height: 60px;
-      user-select: none;
-      pointer-events: none;
-      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
-      border-radius: 10px;
-      background: white;
-      box-shadow: 0 0 8px #bbb;
-      transition: transform 0.5s ease;
-      animation: showRoll 0.4s ease;
-    }
-    .dice img.usado {
-      outline: 4px solid #4caf50;
-      animation: usadoAnim 2.5s ease;
-    }
-    .dice img.no-usado {
-      opacity: 0.3;
-      animation: noUsadoAnim 2.5s ease forwards;
-    }
-    .box-usados {
-      margin-top: 8px;
-      padding: 6px;
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      justify-content: center;
-      border-top: 2px solid #4caf50;
-      background-color: #e8fbe8;
-      border-radius: 8px;
-      min-height: 70px;
-      width: 100%;
-      max-width: 420px;
-    }
-    .box-usados img {
-      width: 40px;
-      height: 40px;
-      opacity: 0.9;
-      border-radius: 6px;
-      box-shadow: 0 0 6px #4caf50aa;
-    }
+
     button {
-      margin: 12px;
-      padding: 25px 60px;
-      font-size: 2em;
-      border: none;
-      border-radius: 12px;
-      background-color: #444;
-      color: white;
+      padding: 10px 20px;
+      font-size: 1.2em;
       cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #666;
-      transform: scale(1.05);
-    }
-    .disabled {
-      pointer-events: none;
-      opacity: 0.6;
     }
 
-    .mensaje-animado {
+    .score {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(220, 0, 0, 0.9);
-      color: white;
-      padding: 20px 40px;
-      font-size: 2em;
+      background: white;
+      padding: 10px;
+      border: 2px solid black;
       border-radius: 10px;
-      opacity: 0;
-      pointer-events: none;
-      animation: aparecerDesaparecer 2.5s ease-out forwards;
-      z-index: 1000;
+      min-width: 100px;
+      text-align: center;
+      font-weight: bold;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes usadoAnim {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-    @keyframes noUsadoAnim {
-      0% { opacity: 1; }
-      100% { opacity: 0; transform: scale(0.5); }
-    }
-    @keyframes aparecerDesaparecer {
-      0% { transform: translate(-50%, -60%) scale(0.8); opacity: 0; }
-      10% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-      90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-      100% { transform: translate(-50%, -40%) scale(1.1); opacity: 0; }
-    }
-    @keyframes showRoll {
-      from { transform: scale(0.6); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    .dado-lanzado {
-      transform: scale(1);
-      opacity: 1;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    
-    img.usado {
-      animation: usadoAnim 0.5s ease forwards;
-    }
-    
-    img.no-usado {
-      animation: noUsadoAnim 0.6s ease forwards;
-    }
-
+    .p1 { top: 10px; left: 10px; }
+    .p2 { top: 10px; right: 10px; }
+    .p3 { bottom: 10px; left: 10px; }
+    .p4 { bottom: 10px; right: 10px; }
   </style>
 </head>
 <body>
 
-  <div class="turno-contador">Turno: <span id="turnCount">1</span></div>
-
-  <div id="player1" class="player turn">
-    <div class="content">
-      <h2>Jugador 1</h2>
-      <div class="total" id="total1">Total: 0</div>
-      <div class="score" id="score1">Turno: 0</div>
-      <div class="dice" id="dice1"></div>
-      <div class="box-usados" id="usados1"></div>
-      <div class="dados-restantes" id="restantes1">Dados restantes: 6</div>
-      <button onclick="tirar(1)">Tirar</button>
-      <button onclick="plantarse(1)">Plantarse</button>
-    </div>
+  <h1>Selecciona número de jugadores</h1>
+  <div class="player-select">
+    <button onclick="selectPlayers(2)">2 Jugadores</button>
+    <button onclick="selectPlayers(3)">3 Jugadores</button>
+    <button onclick="selectPlayers(4)">4 Jugadores</button>
   </div>
-
-  <div id="player2" class="player">
-    <div class="content">
-      <h2>Jugador 2</h2>
-      <div class="total" id="total2">Total: 0</div>
-      <div class="score" id="score2">Turno: 0</div>
-      <div class="dice" id="dice2"></div>
-      <div class="box-usados" id="usados2"></div>
-      <div class="dados-restantes" id="restantes2">Dados restantes: 6</div>
-      <button onclick="tirar(2)">Tirar</button>
-      <button onclick="plantarse(2)">Plantarse</button>
-    </div>
-  </div>
-
-  <div id="mensaje" class="mensaje-animado"></div>
-
-  <audio id="sound-roll" src="sounds/roll.mp3"></audio>
-  <audio id="sound-win" src="sounds/win.mp3"></audio>
-  <audio id="sound-turn" src="sounds/turn.mp3"></audio>
-  <audio id="sound-fail" src="sounds/fail.mp3"></audio>
 
   <script>
-    let totals = [0, 0];
-    let current = [0, 0];
-    let dadosRestantes = [6, 6];
-    let turn = 1;
-    let turnCount = 1;
+    function selectPlayers(count) {
+      const buttons = document.querySelectorAll("button");
+      buttons.forEach(btn => btn.disabled = true);
 
-    const imgPath = face => `img/dice${face}.png`;
-    const soundRoll = document.getElementById("sound-roll");
-    const soundWin = document.getElementById("sound-win");
-    const soundTurn = document.getElementById("sound-turn");
-    const soundFail = document.getElementById("sound-fail");
+      document.querySelector("h1").textContent = `${count} Jugadores seleccionados`;
 
-    function playSound(sound) {
-      sound.currentTime = 0;
-      sound.play();
-    }
-
-    function mostrarMensajeAnimado(texto, sonido = null) {
-      const mensajeDiv = document.getElementById("mensaje");
-      mensajeDiv.textContent = texto;
-      mensajeDiv.style.animation = "none";
-      void mensajeDiv.offsetWidth;
-      mensajeDiv.style.animation = null;
-      if (sonido) playSound(sonido);
-    }
-
-    function actualizarTurnoContador() {
-      turnCount++;
-      document.getElementById("turnCount").textContent = turnCount;
-    }
-
-    function setButtonsEnabled(enabled) {
-      document.querySelectorAll("button").forEach(btn => {
-        btn.disabled = !enabled;
-        btn.classList.toggle("disabled", !enabled);
-      });
-    }
-
-    function mostrarDados(player, dados, usados = []) {
-      const diceDiv = document.getElementById(`dice${player}`);
-      diceDiv.innerHTML = "";
-    
-      dados.forEach((d, i) => {
-        const img = document.createElement("img");
-        img.src = imgPath(d);
-        img.alt = `Dado ${d}`;
-        img.dataset.valor = d;
-        img.classList.add("dado-lanzado");
-        diceDiv.appendChild(img);
-      });
-    
-      // Después de 1 segundo, mover los dados que puntuaron
-      setTimeout(() => moverADadosUsados(player, dados, usados), 1000);
-    }
-
-    function moverADadosUsados(player, todos, usados) {
-      const diceDiv = document.getElementById(`dice${player}`);
-      const usadosDiv = document.getElementById(`usados${player}`);
-    
-      // Filtrar los dados que han puntuado
-      const dadosElements = diceDiv.querySelectorAll("img");
-    
-      // Marcar y mover los usados
-      usados.forEach((valorUsado) => {
-        const index = Array.from(dadosElements).findIndex(img => parseInt(img.dataset.valor) === valorUsado);
-        if (index !== -1) {
-          const img = dadosElements[index];
-          dadosElements[index] = null; // evitar usarlo dos veces
-          img.classList.add("usado");
-          setTimeout(() => {
-            // Copia nueva en la box-usados
-            const imgCopia = document.createElement("img");
-            imgCopia.src = img.src;
-            imgCopia.alt = img.alt;
-            usadosDiv.appendChild(imgCopia);
-    
-            // Eliminar del dado visible original
-            if (img.parentNode) img.parentNode.removeChild(img);
-          }, 800);
-        }
-      });
-    
-      // Eliminar los no usados con animación
-      dadosElements.forEach(img => {
-        if (img && img.parentNode) {
-          img.classList.add("no-usado");
-          setTimeout(() => img.remove(), 800);
-        }
-      });
-    }
-
-    function tirar(player) {
-      if (player !== turn) return;
-
-      if (current[player - 1] === 0) dadosRestantes[player - 1] = 6;
-
-      const diceCount = Math.max(1, dadosRestantes[player - 1]);
-      const dados = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
-
-      playSound(soundRoll);
-
-      const { puntos, usados, win, mensaje } = evaluarTirada([...dados]);
-
-      if (win) {
-        playSound(soundWin);
-        alert(`🎉 ¡Jugador ${player} gana automáticamente con 6 dados iguales!`);
-        resetGame();
-        return;
+      const positions = ["p1", "p2", "p3", "p4"];
+      for (let i = 0; i < count; i++) {
+        const scoreDiv = document.createElement("div");
+        scoreDiv.classList.add("score", positions[i]);
+        scoreDiv.id = `jugador${i + 1}`;
+        scoreDiv.textContent = `Jugador ${i + 1}: 0`;
+        document.body.appendChild(scoreDiv);
       }
 
-      if (puntos === 0) {
-        mostrarDados(player, dados, []);
-        setButtonsEnabled(false);
-        setTimeout(() => {
-          mostrarMensajeAnimado(`Jugador ${player} pierde los puntos del turno`, soundFail);
-          current[player - 1] = 0;
-          // Limpiar dados usados porque pierde turno
-          if (current[player - 1] === 0) document.getElementById(`usados${player}`).innerHTML = "";
-          cambiarTurno();
-          setButtonsEnabled(true);
-        }, 2000);
-        return;
-      }
-
-      setButtonsEnabled(false);
-      mostrarDados(player, dados, [...usados]);
-
-      setTimeout(() => {
-        current[player - 1] += puntos;
-        document.getElementById(`score${player}`).textContent = `Turno: ${current[player - 1]}`;
-
-        let restantes = dados.length - usados.length;
-        if (restantes === 0) restantes = 6;
-        dadosRestantes[player - 1] = restantes;
-        document.getElementById(`restantes${player}`).textContent = `Dados restantes: ${restantes}`;
-
-        if (mensaje) mostrarMensajeAnimado(mensaje);
-        setButtonsEnabled(true);
-      }, 2000);
-    }
-
-    function plantarse(player) {
-      if (player !== turn) return;
-
-      totals[player - 1] += current[player - 1];
-      current[player - 1] = 0;
-
-      document.getElementById(`total${player}`).textContent = `Total: ${totals[player - 1]}`;
-      document.getElementById(`score${player}`).textContent = `Turno: 0`;
-      document.getElementById(`restantes${player}`).textContent = `Dados restantes: 6`;
-      document.getElementById(`dice${player}`).innerHTML = "";
-      document.getElementById(`usados${player}`).innerHTML = "";
-
-      if (totals[player - 1] >= 10000) {
-        mostrarMensajeAnimado(`¡Jugador ${player} gana!`, soundWin);
-        setButtonsEnabled(false);
-        return;
-      }
-
-      cambiarTurno();
-      actualizarTurnoContador();
-    }
-
-    function cambiarTurno() {
-      // Limpiar dados y dados usados del jugador actual
-      document.getElementById(`dice${turn}`).innerHTML = "";
-      document.getElementById(`usados${turn}`).innerHTML = "";
-      document.getElementById(`score${turn}`).textContent = `Turno: 0`;
-      document.getElementById(`restantes${turn}`).textContent = `Dados restantes: 6`;
-
-      // Cambiar clase de turn para destacar jugador activo
-      document.getElementById(`player${turn}`).classList.remove("turn");
-      turn = turn === 1 ? 2 : 1;
-      document.getElementById(`player${turn}`).classList.add("turn");
-    }
-
-    function evaluarTirada(dados) {
-      // contar ocurrencias
-      const counts = {};
-      dados.forEach(d => counts[d] = (counts[d] || 0) + 1);
-
-      // Verificar seis dados iguales
-      for (const face in counts) {
-        if (counts[face] === 6) return { puntos: 10000, usados: dados, win: true };
-      }
-
-      let puntos = 0;
-      const usados = [];
-
-      // Escalera 1-6
-      const esEscalera = [1,2,3,4,5,6].every(n => counts[n] === 1);
-      if (esEscalera) {
-        puntos += 1500;
-        usados.push(...dados);
-        return { puntos, usados, win: false, mensaje: "Escalera 1-6" };
-      }
-
-      // Tres pares
-      const pares = Object.values(counts).filter(c => c === 2).length;
-      if (pares === 3) {
-        puntos += 1500;
-        usados.push(...dados);
-        return { puntos, usados, win: false, mensaje: "Tres pares" };
-      }
-
-      // Tres o más iguales
-      for (const face in counts) {
-        const c = counts[face];
-        if (c >= 3) {
-          let base = 0;
-          if (face == 1) base = 1000;
-          else base = face * 100;
-          puntos += base * Math.pow(2, c - 3);
-          usados.push(...Array(c).fill(parseInt(face)));
-          counts[face] -= c; // descontar contados
-        }
-      }
-
-      // Unos y cincos sueltos
-      if (counts[1]) {
-        puntos += counts[1] * 100;
-        usados.push(...Array(counts[1]).fill(1));
-      }
-      if (counts[5]) {
-        puntos += counts[5] * 50;
-        usados.push(...Array(counts[5]).fill(5));
-      }
-
-      return { puntos, usados, win: false };
-    }
-
-    function resetGame() {
-      totals = [0, 0];
-      current = [0, 0];
-      dadosRestantes = [6, 6];
-      turn = 1;
-      turnCount = 1;
-
-      document.getElementById("turnCount").textContent = turnCount;
-      for(let p=1; p<=2; p++) {
-        document.getElementById(`total${p}`).textContent = "Total: 0";
-        document.getElementById(`score${p}`).textContent = "Turno: 0";
-        document.getElementById(`dice${p}`).innerHTML = "";
-        document.getElementById(`usados${p}`).innerHTML = "";
-        document.getElementById(`restantes${p}`).textContent = "Dados restantes: 6";
-        document.getElementById(`player${p}`).classList.toggle("turn", p === 1);
-      }
-      setButtonsEnabled(true);
+      // Aquí se puede llamar a iniciar el juego
+      // iniciarJuego();
     }
   </script>
+
 </body>
 </html>
