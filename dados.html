@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Juego de Dados</title>
-    <style>
+  <style>
     body {
       margin: 0;
       font-family: sans-serif;
@@ -17,13 +17,13 @@
       position: relative;
       overflow-x: hidden;
     }
-  
+
     h1 {
       margin-bottom: 20px;
       font-size: 3em;
       text-align: center;
     }
-  
+
     .player-select,
     .controls {
       display: flex;
@@ -33,7 +33,7 @@
       justify-content: center;
       margin-bottom: 30px;
     }
-  
+
     button {
       padding: 20px 40px;
       font-size: 2.2em;
@@ -43,11 +43,11 @@
       background-color: white;
       transition: background 0.2s ease;
     }
-  
+
     button:hover {
       background: #ddd;
     }
-  
+
     .score {
       position: absolute;
       background: white;
@@ -59,7 +59,7 @@
       font-weight: bold;
       font-size: 2em;
     }
-  
+
     .p1 { top: 10px; left: 10px; }
     .p2 { top: 10px; right: 10px; }
     .p3 { bottom: 10px; left: 10px; }
@@ -72,63 +72,33 @@
       justify-content: center;
       margin: 20px 0;
     }
-  
+
     .dice {
       width: 80px;
       height: 80px;
-      background: white;
-      border: 2px solid black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3em;
+      object-fit: contain;
       border-radius: 10px;
     }
-  
+
     #turno-actual {
       font-weight: bold;
       font-size: 2.5em;
       margin-bottom: 10px;
     }
-  
+
     #puntos-turno {
       margin-top: 15px;
       font-style: italic;
       font-size: 2em;
       text-align: center;
     }
-    #cubilete {
-      width: 120px;
-      height: 120px;
-      border-radius: 60px;
-      background: #222;
-      margin: 0 auto;
-      animation: none;
-      opacity: 0;
-      position: relative;
-      z-index: 10;
-    }
 
-    @keyframes cubileteAnim {
-      0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-      30%  { transform: translate(-10px, -10px) rotate(-15deg); }
-      60%  { transform: translate(10px, -20px) rotate(15deg); }
-      90%  { transform: translate(0, -30px) rotate(0deg); }
-      100% { transform: translate(0, -80px) scale(0.3); opacity: 0; }
+    #video-lanzamiento {
+      display: none;
+      max-width: 300px;
+      margin: 20px auto;
     }
-    
-    @keyframes rodar {
-      0%   { transform: rotate(0deg) scale(1); opacity: 0; }
-      50%  { transform: rotate(360deg) scale(1.4); opacity: 0.5; }
-      100% { transform: rotate(720deg) scale(1); opacity: 1; }
-    }
-    
-    .dice {
-      animation: rodar 0.6s ease;
-    }
-
   </style>
-
 </head>
 <body>
 
@@ -141,7 +111,10 @@
 
   <div id="turno-actual"></div>
 
-  <div id="cubilete"></div>
+  <video id="video-lanzamiento" muted>
+    <source src="video/lanzar.mp4" type="video/mp4">
+    Tu navegador no soporta la etiqueta de video.
+  </video>
 
   <div class="dice-container" id="dados"></div>
 
@@ -162,11 +135,10 @@
     function selectPlayers(count) {
       jugadores = count;
       puntuaciones = Array(count).fill(0);
-    
-      // Ocultar elementos de selección
+
       document.querySelector("h1").style.display = "none";
       document.querySelector(".player-select").style.display = "none";
-    
+
       const posiciones = ["p1", "p2", "p3", "p4"];
       for (let i = 0; i < count; i++) {
         const marcador = document.createElement("div");
@@ -175,7 +147,7 @@
         marcador.textContent = `Jugador ${i + 1}: 0`;
         document.body.appendChild(marcador);
       }
-    
+
       document.querySelector(".controls").style.display = "flex";
       mostrarTurno();
     }
@@ -186,26 +158,40 @@
 
     function lanzarDados() {
       const cantidad = dadosRestantes;
-      reproducirAnimacionLanzamiento(() => {
-        const dados = Array.from({ length: cantidad }, () => Math.floor(Math.random() * 6) + 1);
+      const dados = Array.from({ length: cantidad }, () => Math.floor(Math.random() * 6) + 1);
+
+      const video = document.getElementById("video-lanzamiento");
+      const sonido = new Audio("sounds/lanzar-dados.mp3");
+
+      document.getElementById("dados").style.display = "none";
+      video.style.display = "block";
+      video.currentTime = 0;
+      video.play();
+      sonido.play();
+
+      video.onended = () => {
+        video.style.display = "none";
+        document.getElementById("dados").style.display = "flex";
         mostrarDados(dados);
-    
-        const { puntos, dadosUtiles } = calcularPuntos(dados);
-        if (puntos === 0) {
-          alert("¡Sin puntos! Turno perdido.");
-          puntosTurno = 0;
-          pasarTurno();
-        } else {
-          puntosTurno += puntos;
-          dadosRestantes = cantidad - dadosUtiles;
-          if (dadosRestantes === 0) {
-            dadosRestantes = 6; // puede volver a tirar con todos
-          }
-          document.getElementById("puntos-turno").textContent = `Puntos en este turno: ${puntosTurno}`;
-        }
-      });
+        procesarPuntos(dados);
+      };
     }
 
+    function procesarPuntos(dados) {
+      const { puntos, dadosUtiles } = calcularPuntos(dados);
+      if (puntos === 0) {
+        alert("¡Sin puntos! Turno perdido.");
+        puntosTurno = 0;
+        pasarTurno();
+      } else {
+        puntosTurno += puntos;
+        dadosRestantes = dados.length - dadosUtiles;
+        if (dadosRestantes === 0) {
+          dadosRestantes = 6;
+        }
+        document.getElementById("puntos-turno").textContent = `Puntos en este turno: ${puntosTurno}`;
+      }
+    }
 
     function plantarse() {
       puntuaciones[turno] += puntosTurno;
@@ -233,10 +219,11 @@
       const contenedor = document.getElementById("dados");
       contenedor.innerHTML = "";
       valores.forEach(valor => {
-        const d = document.createElement("div");
-        d.className = "dice";
-        d.textContent = valor;
-        contenedor.appendChild(d);
+        const img = document.createElement("img");
+        img.src = `img/dice${valor}.png`;
+        img.alt = `Dado ${valor}`;
+        img.className = "dice";
+        contenedor.appendChild(img);
       });
     }
 
@@ -250,20 +237,10 @@
       for (let i = 1; i <= 6; i++) {
         const cantidad = cuenta[i] || 0;
         if (cantidad >= 3) {
-          if (i === 1) {
-            puntos += 300;
-          } else {
-            puntos += i * 100;
-          }
+          puntos += i === 1 ? 300 : i * 100;
           dadosUtiles += 3;
-          if (cantidad >= 4) {
-            puntos += 1000;
-            dadosUtiles += 1;
-          }
-          if (cantidad === 5) {
-            puntos += 1000;
-            dadosUtiles += 1;
-          }
+          if (cantidad >= 4) { puntos += 1000; dadosUtiles += 1; }
+          if (cantidad === 5) { puntos += 1000; dadosUtiles += 1; }
         }
       }
 
@@ -275,6 +252,5 @@
       return { puntos, dadosUtiles };
     }
   </script>
-<script src="efectos.js"></script>
 </body>
 </html>
