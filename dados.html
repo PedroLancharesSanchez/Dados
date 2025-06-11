@@ -436,38 +436,117 @@
   function calcularPuntosConIndices(dados) {
     const contador = {};
     dados.forEach(d => contador[d] = (contador[d] || 0) + 1);
-
+  
+    // Función ayuda para verificar si es escalera
+    function esEscalera(arr) {
+      const sorted = [...arr].sort();
+      return JSON.stringify(sorted) === JSON.stringify([1,2,3,4,5,6]);
+    }
+  
+    // Función ayuda para verificar triple pareja
+    function esTriplePareja(cont) {
+      const pares = Object.values(cont).filter(c => c === 2);
+      return pares.length === 3;
+    }
+  
+    // Función ayuda para verificar doble trío
+    function esDobleTrio(cont) {
+      const trios = Object.values(cont).filter(c => c === 3);
+      return trios.length === 2;
+    }
+  
+    // Detectar tiradas especiales
+    const tiradasEspeciales = {
+      escalera: esEscalera(dados),
+      triplePareja: esTriplePareja(contador),
+      dobleTrio: esDobleTrio(contador),
+      seisIguales: Object.values(contador).some(c => c === 6),
+    };
+  
     let puntos = 0;
     let dadosUtiles = 0;
     let indicesUtiles = [];
-
-    // Ejemplo: 1's = 100 puntos cada uno, 5's = 50 puntos cada uno
-    if (contador[1] > 0) {
-      puntos += contador[1] * 100;
-      dadosUtiles += contador[1];
-      let encontrados = 0;
-      for(let j = 0; j < dados.length && encontrados < contador[1]; j++) {
-        if(dados[j] === 1 && !indicesUtiles.includes(j)) {
-          indicesUtiles.push(j);
-          encontrados++;
+  
+    if (tiradasEspeciales.seisIguales) {
+      // Gana automáticamente
+      alert(`Jugador ${turno + 1} ha sacado seis dados iguales y gana la partida!`);
+      // Aquí puedes agregar lógica para terminar el juego o reiniciar
+      puntos = Infinity; // marca especial
+      dadosUtiles = 6;
+      indicesUtiles = [0,1,2,3,4,5];
+      return { puntos, dadosUtiles, indicesUtiles, tiradasEspeciales };
+    }
+  
+    if (tiradasEspeciales.escalera) {
+      puntos = 1500;
+      dadosUtiles = 6;
+      indicesUtiles = [0,1,2,3,4,5];
+      return { puntos, dadosUtiles, indicesUtiles, tiradasEspeciales };
+    }
+  
+    if (tiradasEspeciales.triplePareja) {
+      puntos = 1500;
+      dadosUtiles = 6;
+      indicesUtiles = [0,1,2,3,4,5];
+      return { puntos, dadosUtiles, indicesUtiles, tiradasEspeciales };
+    }
+  
+    if (tiradasEspeciales.dobleTrio) {
+      puntos = 2500;
+      dadosUtiles = 6;
+      indicesUtiles = [0,1,2,3,4,5];
+      return { puntos, dadosUtiles, indicesUtiles, tiradasEspeciales };
+    }
+  
+    // Puntuación normal
+  
+    // Primero sacar los triples o más
+    Object.entries(contador).forEach(([valorStr, count]) => {
+      const valor = parseInt(valorStr);
+  
+      if (count >= 3) {
+        let pts = 0;
+        if (count === 3) {
+          pts = valor === 1 ? 300 : valor * 100;
+        } else if (count === 4) {
+          pts = 1000;
+        } else if (count === 5) {
+          pts = 2000;
+        } else if (count === 6) {
+          // Ya cubierto arriba, pero por si acaso:
+          pts = Infinity;
+        }
+  
+        puntos += pts;
+        dadosUtiles += count;
+  
+        // Guardar índices de los dados que puntúan
+        let encontrados = 0;
+        for (let i = 0; i < dados.length && encontrados < count; i++) {
+          if (dados[i] === valor && !indicesUtiles.includes(i)) {
+            indicesUtiles.push(i);
+            encontrados++;
+          }
+        }
+      }
+    });
+  
+    // Luego contar 1s y 5s sueltos (que no formen parte de tripletas o más)
+    for (let i = 0; i < dados.length; i++) {
+      if (!indicesUtiles.includes(i)) {
+        if (dados[i] === 1) {
+          puntos += 100;
+          dadosUtiles++;
+          indicesUtiles.push(i);
+        } else if (dados[i] === 5) {
+          puntos += 50;
+          dadosUtiles++;
+          indicesUtiles.push(i);
         }
       }
     }
-    if (contador[5] > 0) {
-      puntos += contador[5] * 50;
-      dadosUtiles += contador[5];
-      let encontrados = 0;
-      for(let j = 0; j < dados.length && encontrados < contador[5]; j++) {
-        if(dados[j] === 5 && !indicesUtiles.includes(j)) {
-          indicesUtiles.push(j);
-          encontrados++;
-        }
-      }
-    }
-
-    // Añadir aquí otras reglas si quieres, como triples, etc.
-
-    return { puntos, dadosUtiles, indicesUtiles };
+  
+    return { puntos, dadosUtiles, indicesUtiles, tiradasEspeciales };
   }
 
   function procesarTirada(dados) {
@@ -475,10 +554,10 @@
   
     const contenedorResultados = document.getElementById("resultados-tiradas");
   
-    // Limpiar el contenedor para que solo quede la última tirada visible
+    // Limpiar para mostrar solo la última tirada
     contenedorResultados.innerHTML = "";
   
-    // Crear contenedor de tirada
+    // Crear contenedor para esta tirada
     const tiradaDiv = document.createElement("div");
     tiradaDiv.style.display = "flex";
     tiradaDiv.style.gap = "10px";
@@ -486,54 +565,63 @@
     tiradaDiv.classList.add(coloresTiradas[tiradaNumero % coloresTiradas.length]);
   
     // Calcular puntos y dados útiles
-    const { puntos, dadosUtiles, indicesUtiles } = calcularPuntosConIndices(dados);
+    const { puntos, dadosUtiles, indicesUtiles, tiradasEspeciales } = calcularPuntosConIndices(dados);
+  
+    // Si gana por seis dados iguales
+    if (puntos === Infinity) {
+      // Actualizar marcador a máximo y terminar el juego o reiniciar
+      puntuaciones[turno] = Infinity;
+      document.getElementById(`jugador${turno}`).textContent = `Jugador ${turno + 1}: GANA! 🎉`;
+      document.querySelector(".controls").style.display = "none";
+      return;
+    }
   
     puntosUltimaTirada = puntos;
     puntosTurno += puntos;
     dadosRestantes -= dadosUtiles;
-    if(dadosRestantes < 0) dadosRestantes = 0;
+    if (dadosRestantes < 0) dadosRestantes = 0;
   
-    // Crear imágenes dados (solo dados que puntuaron)
+    // Crear imágenes dados que puntuaron (indicesUtiles)
     indicesUtiles.forEach(idx => {
       const valor = dados[idx];
       const img = document.createElement("img");
       img.src = `img/dice${valor}.png`;
       img.alt = `Dado ${valor}`;
-      img.className = "dice-result";
-      img.classList.add("resaltado-actual");
-  
+      img.className = "dice-result resaltado-actual";
       tiradaDiv.appendChild(img);
     });
   
     dadosResaltadosPrevios = indicesUtiles;
   
-    // Añadir tirada al contenedor
     contenedorResultados.appendChild(tiradaDiv);
   
-    // Mostrar puntos de turno y dados restantes
     document.getElementById("puntos-turno").textContent = `Puntos este turno: ${puntosTurno} - Dados restantes: ${dadosRestantes}`;
   
-    // Actualizar marcador jugador
     document.getElementById(`jugador${turno}`).textContent = `Jugador ${turno + 1}: ${puntuaciones[turno]}`;
   
-    // Reproducir sonido al procesar tirada
     reproducirSonido();
   
-    // Si no quedan dados para lanzar, reiniciar dados a 6 para el mismo jugador
     if (dadosRestantes === 0) {
-      dadosRestantes = 6; // Reiniciar dados
-      dadosResaltadosPrevios = []; // limpiar resaltados previos para próxima tirada
-      // Mostrar mensaje o simplemente dejar que el jugador lance otra vez con 6 dados
-      // No cambiar turno ni limpiar tiradas para que siga acumulando
-      return; // Salir sin plantarse ni cambiar turno
+      dadosRestantes = 6; // Reset dados si no quedan
+      dadosResaltadosPrevios = [];
+      return; // El jugador puede lanzar otra vez con 6 dados
     }
   
-    // Si puntos en tirada es 0, se fuerza plantarse automático
     if (puntos === 0) {
-      plantarse();
+      // No puntos, turno perdido
+      alert(`Jugador ${turno + 1} no ha sacado puntos. Pierde el turno!`);
+      // Reset puntosTurno sin sumar a marcador
+      puntosTurno = 0;
+      dadosRestantes = 6;
+      dadosResaltadosPrevios = [];
+      tiradaNumero = -1;
+      turno = (turno + 1) % jugadores;
+      document.getElementById("dados").innerHTML = "";
+      document.getElementById("resultados-tiradas").innerHTML = "";
+      document.getElementById("puntos-turno").textContent = "";
+      mostrarTurno();
     }
   }
-
   function plantarse() {
     puntuaciones[turno] += puntosTurno;
 
@@ -555,6 +643,14 @@
     document.getElementById("puntos-turno").textContent = "";
 
     mostrarTurno();
+  }
+
+  function reproducirSonido() {
+    const audio = new Audio("audio/sonido_tirada.mp3");
+    audio.volume = 0.5;
+    audio.play().catch(() => {
+      // Evitar error si no se puede reproducir (por autoplay restrictions)
+    });
   }
 
 </script>
