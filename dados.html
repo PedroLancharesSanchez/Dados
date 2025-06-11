@@ -135,7 +135,7 @@
       width: 560px;
       flex-wrap: wrap;
       justify-content: center;
-      border: 2px solid #333;
+      border: none;
       padding: 20px;
       border-radius: 20px;
       background: #fafafa;
@@ -149,7 +149,7 @@
       width: 120px !important;
       height: 120px !important;
       position: relative !important;
-      box-shadow: 0 0 20px 8px green;
+      box-shadow: none;
       border-radius: 20px;
       margin: 0 10px;
       transition: box-shadow 0.3s ease;
@@ -353,6 +353,8 @@
   }
 
   function mostrarDados(valores) {
+    botonTirar.disabled = false;
+    botonPlantarse.disabled = false;
     const contenedor = document.getElementById("dados");
     contenedor.innerHTML = "";
 
@@ -373,8 +375,11 @@
   }
 
   function animarDado(dadoWrapper, callback) {
+    botonTirar.disabled = true;
+    botonPlantarse.disabled = true;
     const video = document.createElement("video");
     video.src = "video/lanzar.mp4";
+    video.currentTime = 0.5;
     video.autoplay = true;
     video.loop = false;
     video.muted = true;
