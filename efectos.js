@@ -10,16 +10,26 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function reproducirAnimacionLanzamiento() {
-  const dados = document.querySelectorAll(".dice");
-  const sonidoLanzar = new Audio("sounds/lanzar-dados.mp3");
-  sonidoLanzar.play().catch(() => {});
+  const cubilete = document.getElementById("cubilete");
+  const lanzarSonido = new Audio("sounds/lanzar-dados.mp3");
+  const rodarSonido = new Audio("sounds/rodar-dados.mp3");
 
-  dados.forEach(dado => {
-    dado.style.transition = "transform 0.3s ease";
-    dado.style.transform = "scale(1.2) rotate(0deg)";
+  // Mostrar cubilete y reiniciar animación
+  cubilete.style.display = "block";
+  cubilete.style.animation = "none";
+  void cubilete.offsetWidth; // truco para reiniciar animación
+  cubilete.style.animation = "cubileteAnim 1.2s ease-in-out forwards";
 
-    setTimeout(() => {
-      dado.style.transform = `scale(1) rotate(${Math.random() * 360}deg)`;
-    }, 100);
-  });
+  // Reproducir sonido de lanzamiento
+  lanzarSonido.play().catch(() => {});
+
+  // Después de la animación del cubilete, mostrar los dados
+  setTimeout(() => {
+    cubilete.style.display = "none";
+    rodarSonido.play().catch(() => {});
+    
+    // ⚠️ Aquí NO mostramos los dados directamente
+    // Se delega al `lanzarDados()` como ya lo hace (después de la animación)
+  }, 1200);
 }
+
