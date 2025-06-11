@@ -42,6 +42,7 @@
       align-items: center;
       justify-content: center;
       animation: fadeIn 0.5s ease-in;
+      position: relative;
     }
     .turn {
       background-color: #e0ffe0;
@@ -64,6 +65,8 @@
       display: flex;
       gap: 8px;
       justify-content: center;
+      min-height: 70px;
+      position: relative;
     }
     .dice img {
       width: 60px;
@@ -74,15 +77,19 @@
       border-radius: 10px;
       background: white;
       box-shadow: 0 0 8px #bbb;
-      transition: transform 0.5s ease;
+      transition: transform 0.3s ease;
+      position: relative;
+      z-index: 1;
     }
     .dice img.usado {
       outline: 4px solid #4caf50;
-      animation: usadoAnim 2.5s ease;
+      animation: usadoAnim 3s ease;
     }
     .dice img.no-usado {
-      opacity: 0.3;
-      animation: noUsadoAnim 2.5s ease forwards;
+      opacity: 1;
+      animation: noUsadoAnim 3s ease forwards;
+      position: relative;
+      z-index: 0;
     }
     button {
       margin: 12px;
@@ -95,49 +102,60 @@
       cursor: pointer;
       transition: transform 0.2s ease, background-color 0.3s ease;
     }
-    button:hover {
+    button:hover:not(:disabled) {
       background-color: #666;
       transform: scale(1.05);
     }
-    .disabled {
+    button:disabled, .disabled {
       pointer-events: none;
       opacity: 0.6;
+      transform: none !important;
     }
 
-    .mensaje-animado {
+    .mensaje-perdida {
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(220, 0, 0, 0.9);
-      color: white;
-      padding: 20px 40px;
+      transform: translate(-50%, -50%) rotate(90deg);
+      background: #ffdddd;
+      color: #b00000;
+      padding: 15px 30px;
+      border-radius: 12px;
       font-size: 2em;
-      border-radius: 10px;
+      font-weight: bold;
+      box-shadow: 0 0 20px #b00000aa;
+      z-index: 100;
       opacity: 0;
+      animation: fadeInMensaje 3s forwards;
       pointer-events: none;
-      animation: aparecerDesaparecer 2.5s ease-out forwards;
-      z-index: 1000;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 15px;
     }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
     @keyframes usadoAnim {
       0% { transform: scale(1); }
       50% { transform: scale(1.2); }
       100% { transform: scale(1); }
     }
+
     @keyframes noUsadoAnim {
       0% { opacity: 1; }
-      100% { opacity: 0; transform: scale(0.5); }
+      70% { opacity: 1; transform: translateX(0); }
+      100% { opacity: 0; transform: translateX(50px); }
     }
-    @keyframes aparecerDesaparecer {
-      0% { transform: translate(-50%, -60%) scale(0.8); opacity: 0; }
-      10% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-      90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-      100% { transform: translate(-50%, -40%) scale(1.1); opacity: 0; }
+
+    @keyframes fadeInMensaje {
+      0% { opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; }
     }
   </style>
 </head>
@@ -152,8 +170,8 @@
       <div class="score" id="score1">Turno: 0</div>
       <div class="dice" id="dice1"></div>
       <div class="dados-restantes" id="restantes1">Dados restantes: 6</div>
-      <button onclick="tirar(1)">Tirar</button>
-      <button onclick="plantarse(1)">Plantarse</button>
+      <button id="tirar1" onclick="tirar(1)">Tirar</button>
+      <button id="plantarse1" onclick="plantarse(1)">Plantarse</button>
     </div>
   </div>
 
@@ -164,17 +182,16 @@
       <div class="score" id="score2">Turno: 0</div>
       <div class="dice" id="dice2"></div>
       <div class="dados-restantes" id="restantes2">Dados restantes: 6</div>
-      <button onclick="tirar(2)">Tirar</button>
-      <button onclick="plantarse(2)">Plantarse</button>
+      <button id="tirar2" onclick="tirar(2)">Tirar</button>
+      <button id="plantarse2" onclick="plantarse(2)">Plantarse</button>
     </div>
   </div>
 
-  <div id="mensaje" class="mensaje-animado"></div>
-
+  <!-- Audios -->
   <audio id="sound-roll" src="sounds/roll.mp3"></audio>
   <audio id="sound-win" src="sounds/win.mp3"></audio>
   <audio id="sound-turn" src="sounds/turn.mp3"></audio>
-  <audio id="sound-fail" src="sounds/fail.mp3"></audio>
+  <audio id="sound-lose" src="sounds/lose.mp3"></audio>
 
   <script>
     let totals = [0, 0];
@@ -187,20 +204,20 @@
     const soundRoll = document.getElementById("sound-roll");
     const soundWin = document.getElementById("sound-win");
     const soundTurn = document.getElementById("sound-turn");
-    const soundFail = document.getElementById("sound-fail");
+    const soundLose = document.getElementById("sound-lose");
+
+    let isBusy = false;
 
     function playSound(sound) {
-      sound.currentTime = 0;
-      sound.play();
+      return new Promise(resolve => {
+        sound.currentTime = 0;
+        sound.play();
+        sound.onended = () => resolve();
+      });
     }
 
-    function mostrarMensajeAnimado(texto, sonido = null) {
-      const mensajeDiv = document.getElementById("mensaje");
-      mensajeDiv.textContent = texto;
-      mensajeDiv.style.animation = "none";
-      void mensajeDiv.offsetWidth;
-      mensajeDiv.style.animation = null;
-      if (sonido) playSound(sonido);
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     function actualizarTurnoContador() {
@@ -218,6 +235,7 @@
     function mostrarDados(player, dados, usados = []) {
       const diceDiv = document.getElementById(`dice${player}`);
       diceDiv.innerHTML = "";
+
       dados.forEach(d => {
         const img = document.createElement("img");
         img.src = imgPath(d);
@@ -233,56 +251,76 @@
       });
     }
 
-    function tirar(player) {
-      if (player !== turn) return;
+    async function tirar(player) {
+      if (player !== turn || isBusy) return;
+      isBusy = true;
+      setButtonsEnabled(false);
 
       if (current[player - 1] === 0) dadosRestantes[player - 1] = 6;
 
       const diceCount = Math.max(1, dadosRestantes[player - 1]);
       const dados = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
 
-      playSound(soundRoll);
+      await playSound(soundRoll);
 
       const { puntos, usados, win, mensaje } = evaluarTirada([...dados]);
 
       if (win) {
-        playSound(soundWin);
+        await playSound(soundWin);
         alert(`🎉 ¡Jugador ${player} gana automáticamente con 6 dados iguales!`);
         resetGame();
+        isBusy = false;
         return;
       }
 
       if (puntos === 0) {
         mostrarDados(player, dados, []);
-        setButtonsEnabled(false);
-        setTimeout(() => {
-          mostrarMensajeAnimado(`Jugador ${player} pierde los puntos del turno`, soundFail);
-          current[player - 1] = 0;
-          cambiarTurno();
-          setButtonsEnabled(true);
-        }, 2000);
+        // Esperar animación de dados no usados (3s)
+        await playSound(soundLose);
+        await showLoseMessage(player);
+
+        current[player - 1] = 0;
+        cambiarTurno();
+
+        setButtonsEnabled(true);
+        isBusy = false;
         return;
       }
 
-      setButtonsEnabled(false);
       mostrarDados(player, dados, [...usados]);
 
-      setTimeout(() => {
-        current[player - 1] += puntos;
-        document.getElementById(`score${player}`).textContent = `Turno: ${current[player - 1]}`;
+      // Esperar animaciones (3s)
+      await sleep(3000);
 
-        let restantes = dados.length - usados.length;
-        if (restantes === 0) restantes = 6;
-        dadosRestantes[player - 1] = restantes;
-        document.getElementById(`restantes${player}`).textContent = `Dados restantes: ${restantes}`;
+      current[player - 1] += puntos;
+      document.getElementById(`score${player}`).textContent = `Turno: ${current[player - 1]}`;
 
-        if (mensaje) mostrarMensajeAnimado(mensaje);
-        setButtonsEnabled(true);
-      }, 2000);
+      let restantes = dados.length - usados.length;
+      if (restantes === 0) restantes = 6;
+      dadosRestantes[player - 1] = restantes;
+      document.getElementById(`restantes${player}`).textContent = `Dados restantes: ${restantes}`;
+
+      if (mensaje) alert(mensaje);
+
+      setButtonsEnabled(true);
+      isBusy = false;
     }
 
-    function plantarse(player) {
-      if (player !== turn) return;
+    async function showLoseMessage(player) {
+      const contentDiv = document.querySelector(`#player${player} .content`);
+      const messageDiv = document.createElement("div");
+      messageDiv.className = "mensaje-perdida";
+      messageDiv.textContent = "¡Pierdes el turno!";
+      contentDiv.appendChild(messageDiv);
+
+      await sleep(3000);
+      contentDiv.removeChild(messageDiv);
+    }
+
+    async function plantarse(player) {
+      if (player !== turn || isBusy) return;
+      isBusy = true;
+      setButtonsEnabled(false);
 
       totals[player - 1] += current[player - 1];
       current[player - 1] = 0;
@@ -292,12 +330,17 @@
       document.getElementById(`restantes${player}`).textContent = "Dados restantes: 6";
 
       if (totals[player - 1] >= 10000) {
-        playSound(soundWin);
+        await playSound(soundWin);
         alert(`🎉 ¡Jugador ${player} gana con 10.000 puntos!`);
         resetGame();
+        isBusy = false;
+        return;
       } else {
         cambiarTurno();
       }
+
+      setButtonsEnabled(true);
+      isBusy = false;
     }
 
     function cambiarTurno() {
@@ -325,6 +368,7 @@
         document.getElementById(`player${i}`).classList.remove("turn");
       }
       document.getElementById("player1").classList.add("turn");
+      setButtonsEnabled(true);
     }
 
     function evaluarTirada(dados) {
@@ -351,10 +395,19 @@
 
       for (let num = 1; num <= 6; num++) {
         let count = conteo[num] || 0;
-        if (count >= 6) return { puntos: 0, usados: dados, win: true };
-        else if (count === 5) { puntos += 2000; usados.push(...Array(5).fill(num)); }
-        else if (count === 4) { puntos += 1000; usados.push(...Array(4).fill(num)); }
-        else if (count === 3) { puntos += (num === 1 ? 300 : num * 100); usados.push(...Array(3).fill(num)); }
+
+        if (count >= 6) {
+          return { puntos: 0, usados: dados, win: true };
+        } else if (count === 5) {
+          puntos += 2000;
+          usados.push(...Array(5).fill(num));
+        } else if (count === 4) {
+          puntos += 1000;
+          usados.push(...Array(4).fill(num));
+        } else if (count === 3) {
+          puntos += (num === 1 ? 300 : num * 100);
+          usados.push(...Array(3).fill(num));
+        }
       }
 
       for (let num of [1, 5]) {
