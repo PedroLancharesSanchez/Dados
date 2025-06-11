@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const clickSound = new Audio("click.mp3");
+  const clickSound = new Audio("sounds/click.mp3");
 
   document.querySelectorAll("button").forEach(button => {
     button.addEventListener("click", () => {
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function reproducirAnimacionLanzamiento() {
   const dados = document.querySelectorAll(".dice");
-  const sonidoLanzar = new Audio("lanzar-dados.mp3");
+  const sonidoLanzar = new Audio("sounds/lanzar-dados.mp3");
   sonidoLanzar.play().catch(() => {});
 
   dados.forEach(dado => {
