@@ -15,27 +15,24 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-function reproducirAnimacionLanzamiento() {
+function reproducirAnimacionLanzamiento(callback) {
   const cubilete = document.getElementById("cubilete");
   const lanzarSonido = new Audio("sounds/lanzar-dados.mp3");
   const rodarSonido = new Audio("sounds/rodar-dados.mp3");
 
-  // Mostrar cubilete y reiniciar animación
   cubilete.style.display = "block";
   cubilete.style.animation = "none";
-  void cubilete.offsetWidth; // truco para reiniciar animación
+  void cubilete.offsetWidth; // reinicia animación
   cubilete.style.animation = "cubileteAnim 1.2s ease-in-out forwards";
 
-  // Reproducir sonido de lanzamiento
   lanzarSonido.play().catch(() => {});
 
-  // Después de la animación del cubilete, mostrar los dados
   setTimeout(() => {
     cubilete.style.display = "none";
     rodarSonido.play().catch(() => {});
     
-    // ⚠️ Aquí NO mostramos los dados directamente
-    // Se delega al `lanzarDados()` como ya lo hace (después de la animación)
+    // Ejecutar el callback para mostrar dados y continuar el turno
+    if (typeof callback === "function") callback();
   }, 1200);
 }
 
