@@ -165,6 +165,20 @@
       from { transform: scale(0.6); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
+    .dado-lanzado {
+      transform: scale(1);
+      opacity: 1;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    
+    img.usado {
+      animation: usadoAnim 0.5s ease forwards;
+    }
+    
+    img.no-usado {
+      animation: noUsadoAnim 0.6s ease forwards;
+    }
+
   </style>
 </head>
 <body>
@@ -246,27 +260,53 @@
     function mostrarDados(player, dados, usados = []) {
       const diceDiv = document.getElementById(`dice${player}`);
       diceDiv.innerHTML = "";
-
-      dados.forEach(d => {
+    
+      dados.forEach((d, i) => {
         const img = document.createElement("img");
         img.src = imgPath(d);
         img.alt = `Dado ${d}`;
+        img.dataset.valor = d;
+        img.classList.add("dado-lanzado");
         diceDiv.appendChild(img);
       });
-
-      // Después de breve delay, mover los dados que puntuaron a la caja de usados
-      setTimeout(() => moverADadosUsados(player, usados), 1000);
+    
+      // Después de 1 segundo, mover los dados que puntuaron
+      setTimeout(() => moverADadosUsados(player, dados, usados), 1000);
     }
 
-    function moverADadosUsados(player, usados) {
+    function moverADadosUsados(player, todos, usados) {
+      const diceDiv = document.getElementById(`dice${player}`);
       const usadosDiv = document.getElementById(`usados${player}`);
-      usadosDiv.innerHTML = ""; // Limpiar dados usados anteriores antes de agregar nuevos
-
-      usados.forEach(d => {
-        const img = document.createElement("img");
-        img.src = imgPath(d);
-        img.alt = `Dado usado ${d}`;
-        usadosDiv.appendChild(img);
+    
+      // Filtrar los dados que han puntuado
+      const dadosElements = diceDiv.querySelectorAll("img");
+    
+      // Marcar y mover los usados
+      usados.forEach((valorUsado) => {
+        const index = Array.from(dadosElements).findIndex(img => parseInt(img.dataset.valor) === valorUsado);
+        if (index !== -1) {
+          const img = dadosElements[index];
+          dadosElements[index] = null; // evitar usarlo dos veces
+          img.classList.add("usado");
+          setTimeout(() => {
+            // Copia nueva en la box-usados
+            const imgCopia = document.createElement("img");
+            imgCopia.src = img.src;
+            imgCopia.alt = img.alt;
+            usadosDiv.appendChild(imgCopia);
+    
+            // Eliminar del dado visible original
+            if (img.parentNode) img.parentNode.removeChild(img);
+          }, 800);
+        }
+      });
+    
+      // Eliminar los no usados con animación
+      dadosElements.forEach(img => {
+        if (img && img.parentNode) {
+          img.classList.add("no-usado");
+          setTimeout(() => img.remove(), 800);
+        }
       });
     }
 
@@ -296,7 +336,7 @@
           mostrarMensajeAnimado(`Jugador ${player} pierde los puntos del turno`, soundFail);
           current[player - 1] = 0;
           // Limpiar dados usados porque pierde turno
-          document.getElementById(`usados${player}`).innerHTML = "";
+          if (current[player - 1] === 0) document.getElementById(`usados${player}`).innerHTML = "";
           cambiarTurno();
           setButtonsEnabled(true);
         }, 2000);
