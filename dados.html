@@ -305,6 +305,11 @@
 
   let dadosResaltadosPrevios = [];
 
+  // Duración fija del video en ms (ej: 1500ms)
+  const DURACION_VIDEO = 1500;
+
+  let puntosUltimaTirada = 0;
+
   function selectPlayers(count) {
     jugadores = count;
     puntuaciones = Array(count).fill(0);
@@ -368,36 +373,44 @@
     video.style.borderRadius = "20px";
     dadoWrapper.appendChild(video);
 
+    // Eliminamos el video tras DURACION_VIDEO ms forzado
+    const timeoutId = setTimeout(() => {
+      video.remove();
+      if (callback) callback();
+    }, DURACION_VIDEO);
+
     video.onended = () => {
+      clearTimeout(timeoutId);
       video.remove();
       if (callback) callback();
     };
   }
 
   function lanzarDados() {
-    if(dadosRestantes <= 0) return;
-
-    let resultados = [];
-    for(let i=0; i<dadosRestantes; i++) {
-      resultados.push(Math.floor(Math.random() * 6) + 1);
+    if (dadosRestantes <= 0) {
+      // En vez de bloquear, asignamos 6 dados si es 0.
+      dadosRestantes = 6;
     }
-
-    mostrarDados(resultados);
-
-    // Animar todos los dados y luego procesar puntos y mover dados puntuados
-    const dadosElems = document.querySelectorAll("#dados > div");
-    let animacionesCompletadas = 0;
-
-    dadosElems.forEach((wrapper, i) => {
-      animarDado(wrapper, () => {
-        animacionesCompletadas++;
-        if(animacionesCompletadas === dadosElems.length) {
-          procesarPuntos(resultados);
-          moverDadosPuntuados(resultados);
-          actualizarPuntosTurno();
+  
+    const cantidad = dadosRestantes;
+    const dados = Array.from({ length: cantidad }, () => Math.floor(Math.random() * 6) + 1);
+  
+    mostrarDados(dados);
+  
+    const contenedor = document.getElementById("dados");
+    let animacionesPendientes = cantidad;
+  
+    for (let i = 0; i < cantidad; i++) {
+      const dadoWrapper = contenedor.children[i];
+      animarDado(dadoWrapper, () => {
+        animacionesPendientes--;
+        if (animacionesPendientes === 0) {
+          setTimeout(() => {
+            procesarTirada(dados);
+          }, 1000);
         }
       });
-    });
+    }
   }
 
   // Función que calcula puntos, dados útiles e índices de dados puntuados
@@ -436,25 +449,36 @@
     return { puntos, dadosUtiles, indicesUtiles };
   }
 
-  // Procesar puntos y actualizar texto con puntuación de tirada y total turno
-  function procesarPuntos(dados) {
-    const { puntos, dadosUtiles } = calcularPuntosConIndices(dados);
+  function procesarTirada(dados) {
+    const { puntos, dadosUtiles, indicesUtiles } = calcularPuntosConIndices(dados);
+  
+    if (puntos === 0) {
+      alert("¡No has puntuado en esta tirada! Pierdes el turno.");
+      resetTurno();
+      pasarTurno();
+      return;
+    }
+  
     puntosTurno += puntos;
     dadosRestantes -= dadosUtiles;
-
+  
+    // Si quedan 0 dados para tirar, reiniciar dadosRestantes a 6
+    if (dadosRestantes === 0) {
+      dadosRestantes = 6;
+    }
+  
+    puntosUltimaTirada = puntos;
     actualizarPuntosTurno();
+    moverDadosPuntuados(indicesUtiles);
   }
-
   // Actualiza el texto con puntos de tirada y total acumulado en el turno
   function actualizarPuntosTurno() {
     const elem = document.getElementById("puntos-turno");
-    elem.textContent = `Puntos esta tirada: ${puntosTurno - puntosUltimaTirada} | Total turno: ${puntosTurno} | Dados restantes: ${dadosRestantes}`;
+    elem.textContent = `Puntos esta tirada: ${puntosUltimaTirada} | Total turno: ${puntosTurno} | Dados restantes: ${dadosRestantes}`;
   }
 
-  let puntosUltimaTirada = 0;
-
-  // Corrección: sólo clona dados que puntuaron en esta tirada y limpia previos
-  function moverDadosPuntuados(dados) {
+  // Clona sólo dados que puntuaron para mostrar en resultados
+  function moverDadosPuntuados(indicesUtiles) {
     const resultados = document.getElementById("resultados-tiradas");
 
     dadosResaltadosPrevios.forEach(clone => clone.remove());
@@ -462,10 +486,6 @@
 
     tiradaNumero++;
     const colorActual = coloresTiradas[tiradaNumero % coloresTiradas.length];
-
-    const { indicesUtiles } = calcularPuntosConIndices(dados);
-
-    if(indicesUtiles.length === 0) return;
 
     const contenedorDados = document.getElementById("dados");
 
@@ -478,16 +498,18 @@
       resultados.appendChild(clone);
       dadosResaltadosPrevios.push(clone);
     });
-
-    // Actualizamos puntosUltimaTirada para mostrar diferencia la próxima tirada
-    puntosUltimaTirada = calcularPuntosConIndices(dados).puntos;
   }
 
   function plantarse() {
     puntuaciones[turno] += puntosTurno;
     document.getElementById(`jugador${turno}`).textContent = `Jugador ${turno + 1}: ${puntuaciones[turno]}`;
+    resetTurno();
+    pasarTurno();
+  }
+
+  function resetTurno() {
     puntosTurno = 0;
-    pontosUltimaTirada = 0;
+    puntosUltimaTirada = 0;
     dadosRestantes = 6;
 
     document.getElementById("puntos-turno").textContent = "";
@@ -495,8 +517,6 @@
     document.getElementById("resultados-tiradas").innerHTML = "";
 
     dadosResaltadosPrevios = [];
-
-    pasarTurno();
   }
 
   function pasarTurno() {
