@@ -7,20 +7,20 @@
     body {
       margin: 0;
       font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
       height: 100vh;
       background: white;
-      padding-top: 20px;
-      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* Centra vertical */
+      align-items: center;     /* Centra horizontal */
       overflow-x: hidden;
+      position: relative;
+      padding: 0;
     }
 
     h1 {
-      margin-bottom: 20px;
-      font-size: 3em;
+      margin-bottom: 40px;
+      font-size: 6em; /* el doble de 3em */
       text-align: center;
     }
 
@@ -28,19 +28,19 @@
     .controls {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 40px; /* el doble */
       align-items: center;
       justify-content: center;
-      margin-bottom: 30px;
+      margin-bottom: 60px;
       position: relative;
       z-index: 20;
     }
 
     button {
-      padding: 20px 40px;
-      font-size: 2.2em;
+      padding: 40px 80px; /* doble */
+      font-size: 4.4em; /* doble */
       cursor: pointer;
-      border-radius: 10px;
+      border-radius: 20px;
       border: 2px solid #333;
       background-color: white;
       transition: background 0.2s ease;
@@ -53,38 +53,40 @@
     .score {
       position: absolute;
       background: white;
-      padding: 10px 20px;
+      padding: 20px 40px; /* doble */
       border: 2px solid black;
-      border-radius: 10px;
-      min-width: 140px;
+      border-radius: 20px;
+      min-width: 280px; /* doble */
       text-align: center;
       font-weight: bold;
-      font-size: 2em;
+      font-size: 4em; /* doble */
       z-index: 10;
+      box-sizing: border-box;
     }
 
-    .p1 { top: 10px; left: 10px; }
-    .p2 { top: 10px; right: 10px; }
-    .p3 { bottom: 10px; left: 10px; }
-    .p4 { bottom: 10px; right: 10px; }
+    /* Mantener puntuaciones en esquinas, con algo más de margen para que no queden pegadas */
+    .p1 { top: 20px; left: 20px; }
+    .p2 { top: 20px; right: 20px; }
+    .p3 { bottom: 20px; left: 20px; }
+    .p4 { bottom: 20px; right: 20px; }
 
     .dice-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 15px;
+      gap: 30px; /* doble */
       justify-content: center;
-      margin: 20px 0;
+      margin: 40px 0; /* doble */
       position: relative;
-      height: 100px; /* suficiente para posicion absoluta de dados */
-      width: 600px;
+      height: 200px; /* doble */
+      width: 1200px; /* doble */
       z-index: 15;
     }
 
     .dice {
-      width: 80px;
-      height: 80px;
+      width: 160px; /* doble */
+      height: 160px; /* doble */
       object-fit: contain;
-      border-radius: 10px;
+      border-radius: 20px;
       position: absolute;
       top: 0;
       left: 0;
@@ -93,67 +95,65 @@
 
     #turno-actual {
       font-weight: bold;
-      font-size: 2.5em;
-      margin-bottom: 10px;
+      font-size: 5em; /* doble */
+      margin-bottom: 20px;
       z-index: 20;
+      text-align: center;
+      width: 100%;
     }
 
     #puntos-turno {
-      margin-top: 15px;
+      margin-top: 30px; /* doble */
       font-style: italic;
-      font-size: 2em;
+      font-size: 4em; /* doble */
       text-align: center;
       z-index: 20;
+      width: 100%;
     }
 
-    /* Caja de resultados debajo de botones */
     #resultados-tiradas {
-      margin-top: 20px;
+      margin-top: 40px; /* doble */
       display: flex;
-      gap: 15px;
-      min-height: 100px;
-      width: 600px;
+      gap: 30px; /* doble */
+      min-height: 200px; /* doble */
+      width: 1200px; /* doble */
       flex-wrap: wrap;
       justify-content: center;
       border: 2px solid #333;
-      padding: 10px;
-      border-radius: 10px;
+      padding: 20px; /* doble */
+      border-radius: 20px;
       background: #fafafa;
       position: relative;
       z-index: 10;
+      box-sizing: border-box;
     }
 
-    /* Dados en resultados */
     .dice-result {
-      width: 60px !important;
-      height: 60px !important;
+      width: 120px !important; /* doble 60px */
+      height: 120px !important;
       position: relative !important;
       top: auto !important;
       left: auto !important;
-      box-shadow: 0 0 10px 4px green;
-      border-radius: 10px;
-      margin: 0 5px;
+      box-shadow: 0 0 20px 8px green;
+      border-radius: 20px;
+      margin: 0 10px; /* doble */
       transition: box-shadow 0.3s ease;
     }
 
-    /* Clases para colores de tirada */
-    .color1 { box-shadow: 0 0 15px 4px #4CAF50 !important; }
-    .color2 { box-shadow: 0 0 15px 4px #2196F3 !important; }
-    .color3 { box-shadow: 0 0 15px 4px #FF9800 !important; }
-    .color4 { box-shadow: 0 0 15px 4px #9C27B0 !important; }
-    .color5 { box-shadow: 0 0 15px 4px #E91E63 !important; }
-    .color6 { box-shadow: 0 0 15px 4px #00BCD4 !important; }
+    .color1 { box-shadow: 0 0 30px 8px #4CAF50 !important; }
+    .color2 { box-shadow: 0 0 30px 8px #2196F3 !important; }
+    .color3 { box-shadow: 0 0 30px 8px #FF9800 !important; }
+    .color4 { box-shadow: 0 0 30px 8px #9C27B0 !important; }
+    .color5 { box-shadow: 0 0 30px 8px #E91E63 !important; }
+    .color6 { box-shadow: 0 0 30px 8px #00BCD4 !important; }
 
-    /* Dados resaltados en la tirada actual (verde) */
     .resaltado-actual {
-      box-shadow: 0 0 15px 4px #4CAF50 !important;
+      box-shadow: 0 0 30px 8px #4CAF50 !important;
     }
 
-    /* Dados resaltados de tiradas anteriores (azul) */
     .resaltado-previo {
-      box-shadow: 0 0 15px 4px #2196F3 !important;
+      box-shadow: 0 0 30px 8px #2196F3 !important;
     }
-
   </style>
 </head>
 <body>
@@ -176,7 +176,6 @@
 
   <div id="puntos-turno"></div>
 
-  <!-- Caja donde se muestran dados puntuados -->
   <div id="resultados-tiradas"></div>
 
 <script>
@@ -186,10 +185,9 @@
   let puntosTurno = 0;
   let dadosRestantes = 6;
 
-  let tiradaNumero = 0; // para colorear tiradas
+  let tiradaNumero = 0;
   let coloresTiradas = ["color1","color2","color3","color4","color5","color6"];
 
-  // Guardamos dados resaltados anteriores para cambiar color
   let dadosResaltadosPrevios = [];
 
   function selectPlayers(count) {
@@ -223,13 +221,11 @@
     valores.forEach((valor, idx) => {
       const dadoWrapper = document.createElement("div");
       dadoWrapper.style.position = "relative";
-      dadoWrapper.style.width = "80px";
-      dadoWrapper.style.height = "80px";
+      dadoWrapper.style.width = "160px"; // doble
+      dadoWrapper.style.height = "160px"; // doble
 
-      // Posición relativa para animación
-      // Vamos a ponerlos en fila con separación horizontal y posición absoluta para animación
       dadoWrapper.style.position = "absolute";
-      dadoWrapper.style.left = `${idx * 90}px`;
+      dadoWrapper.style.left = `${idx * 180}px`; // doble distancia + 10 extra para separación
       dadoWrapper.style.top = `0`;
 
       const img = document.createElement("img");
@@ -246,15 +242,18 @@
     const video = document.createElement("video");
     video.src = "video/lanzar.mp4";
     video.muted = true;
+
+    // Ajustamos tamaño del video para cubrir exactamente 160x160px dado
     video.style.position = "absolute";
     video.style.top = "0";
     video.style.left = "0";
-    video.style.width = "100px";
-    video.style.height = "80px";
+    video.style.width = "160px";
+    video.style.height = "160px";
     video.style.zIndex = "10";
 
-    // Recortar 10px a cada lado para que el área visible sea 80px ancho x 80px alto
-    video.style.clipPath = "inset(0 10px 0 10px)";
+    // Quitamos clipPath para que no se vea nada del dado debajo
+    // (antes recortaba 10px a cada lado, ahora queremos que cubra completo)
+    video.style.clipPath = "none";
 
     dadoWrapper.appendChild(video);
 
@@ -300,7 +299,6 @@
       animarDado(dadoWrapper, () => {
         animacionesPendientes--;
         if (animacionesPendientes === 0) {
-          // Esperar 1 segundo antes de mover dados puntuados
           setTimeout(() => {
             procesarPuntos(dados);
             moverDadosPuntuados(dados);
@@ -319,27 +317,23 @@
     } else {
       puntosTurno += puntos;
       dadosRestantes = dados.length - dadosUtiles;
-      if (dadosRestantes === 0) dadosRestantes = 6; // Si usaste todos, vuelves a 6
+      if (dadosRestantes === 0) dadosRestantes = 6;
       document.getElementById("puntos-turno").textContent = `Puntos este turno: ${puntosTurno}`;
     }
   }
 
-  // Calcula puntos y devuelve cuántos dados son útiles para puntuar
   function calcularPuntos(dados) {
-    // Contar dados
-    let contador = [0,0,0,0,0,0,0]; // indices 1-6
+    let contador = [0,0,0,0,0,0,0];
     dados.forEach(d => contador[d]++);
     let puntos = 0;
     let dadosUtiles = 0;
 
-    // Comprobar escalera 1-6
     if (contador.slice(1).every(c => c === 1)) {
       puntos += 1500;
       dadosUtiles = 6;
       return { puntos, dadosUtiles };
     }
 
-    // Tríos, cuartetos, quintetos, sextetos
     for (let i = 1; i <= 6; i++) {
       if (contador[i] >= 3) {
         if (i === 1) {
@@ -352,12 +346,10 @@
       }
     }
 
-    // 1 sueltos
     if (contador[1] > 0) {
       puntos += contador[1] * 100;
       dadosUtiles += contador[1];
     }
-    // 5 sueltos
     if (contador[5] > 0) {
       puntos += contador[5] * 50;
       dadosUtiles += contador[5];
@@ -366,112 +358,67 @@
     return { puntos, dadosUtiles };
   }
 
-  // Mover dados puntuados a caja resultados con animación y color
   function moverDadosPuntuados(dados) {
     const resultados = document.getElementById("resultados-tiradas");
 
-    // Color de esta tirada
     tiradaNumero = (tiradaNumero + 1) % coloresTiradas.length;
     const claseColor = coloresTiradas[tiradaNumero];
 
-    // Cambiar dados resaltados previos a color previo
     dadosResaltadosPrevios.forEach(img => {
       img.classList.remove("resaltado-actual");
       img.classList.add("resaltado-previo");
     });
     dadosResaltadosPrevios = [];
 
-    // Identificar dados puntuados (tríos, 1 y 5, escalera)
-    // Usamos la función calcularPuntos para saber cuántos dados puntúan
     let { dadosUtiles } = calcularPuntos(dados);
-
-    if (dadosUtiles === 0) return; // Nada que mover
-
-    // Extraer dados puntuados - como ejemplo vamos a mover los primeros dadosUtiles dados puntuados
-    // Nota: en casos más complejos deberíamos identificar cuáles dados exactamente puntúan (ej. 1,5, tríos)
-    // Para simplicidad, asumimos que los primeros dadosUtiles dados puntúan.
+    if (dadosUtiles === 0) return;
 
     const dadosPuntuados = dados.slice(0, dadosUtiles);
 
-    // Para cada dado puntuado, crear clon, posicionarlo encima, animar hacia resultados
     const contenedorDados = document.getElementById("dados");
 
     dadosPuntuados.forEach((valor, idx) => {
-      // Encontrar la imagen original en contenedor dados (ya que es absoluta)
       const dadoOriginal = contenedorDados.children[idx].querySelector("img");
-
-      // Obtener posición en pantalla
       const rectOriginal = dadoOriginal.getBoundingClientRect();
 
-      // Crear clon
       const clone = dadoOriginal.cloneNode();
       clone.classList.add("dice-result", "resaltado-actual", claseColor);
 
-      // Posicionar clon en la misma posición absoluta (relativo a viewport)
       clone.style.position = "fixed";
       clone.style.top = `${rectOriginal.top}px`;
       clone.style.left = `${rectOriginal.left}px`;
       clone.style.margin = "0";
-      clone.style.zIndex = 1000;
 
       document.body.appendChild(clone);
 
-      // Objetivo: posición dentro del contenedor resultados
-      // Calculamos posición del contenedor resultados + offset según cuantos hijos ya tiene
-      const rectResultados = resultados.getBoundingClientRect();
-      // Dejar margen 10px a la izquierda + ancho dado * número de dados ya en resultados
-      const offsetX = rectResultados.left + 10 + resultados.children.length * 65;
-      const offsetY = rectResultados.top + 20;
-
-      // Animar con transición CSS y transform
-      // Necesitamos calcular delta X e Y
-      const deltaX = offsetX - rectOriginal.left;
-      const deltaY = offsetY - rectOriginal.top;
-
-      // Forzar reflow para transición
-      clone.style.transition = "transform 1s ease";
-      requestAnimationFrame(() => {
-        clone.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-      });
-
-      // Cuando termina la transición, insertarlo en contenedor resultados y limpiar estilos para adaptarse al layout
-      clone.addEventListener("transitionend", () => {
+      setTimeout(() => {
+        resultados.appendChild(clone);
         clone.style.position = "relative";
         clone.style.top = "auto";
         clone.style.left = "auto";
-        clone.style.transform = "none";
-        clone.style.transition = "none";
-        clone.style.zIndex = "auto";
-        resultados.appendChild(clone);
+        clone.style.margin = "0 10px";
+      }, 100);
 
-        // Guardar para cambiar clase en siguientes tiradas
-        dadosResaltadosPrevios.push(clone);
-      }, { once: true });
+      dadosResaltadosPrevios.push(clone);
     });
   }
 
   function plantarse() {
-    // Guardar puntos
     puntuaciones[turno] += puntosTurno;
     document.getElementById(`jugador${turno}`).textContent = `Jugador ${turno + 1}: ${puntuaciones[turno]}`;
-
-    // Reset puntos turno y dados
     puntosTurno = 0;
     dadosRestantes = 6;
+
     document.getElementById("puntos-turno").textContent = "";
 
-    // Limpiar caja resultados
-    const resultados = document.getElementById("resultados-tiradas");
-    resultados.innerHTML = "";
-    dadosResaltadosPrevios = [];
+    pasarTurno();
+  }
 
-    // Cambiar turno
+  function pasarTurno() {
     turno = (turno + 1) % jugadores;
     mostrarTurno();
-
-    // Limpiar dados para próxima tirada
-    const contenedorDados = document.getElementById("dados");
-    contenedorDados.innerHTML = "";
+    document.getElementById("dados").innerHTML = "";
+    document.getElementById("puntos-turno").textContent = "";
   }
 </script>
 
