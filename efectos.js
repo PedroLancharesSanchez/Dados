@@ -1,13 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
   const clickSound = new Audio("sounds/click.mp3");
 
-  document.querySelectorAll("button").forEach(button => {
-    button.addEventListener("click", () => {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(() => {});
+  // Espera a que se cargue la metadata del sonido
+  clickSound.addEventListener("loadedmetadata", () => {
+    const halfTime = clickSound.duration / 2;
+
+    document.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => {
+        clickSound.currentTime = halfTime;
+        clickSound.play().catch(() => {});
+      });
     });
   });
 });
+
 
 function reproducirAnimacionLanzamiento() {
   const cubilete = document.getElementById("cubilete");
