@@ -466,56 +466,53 @@
 
   function procesarTirada(dados) {
     tiradaNumero++;
-
+  
     const contenedorResultados = document.getElementById("resultados-tiradas");
-
+  
     // Crear contenedor de tirada
     const tiradaDiv = document.createElement("div");
     tiradaDiv.style.display = "flex";
     tiradaDiv.style.gap = "10px";
     tiradaDiv.style.flexWrap = "wrap";
     tiradaDiv.classList.add(coloresTiradas[tiradaNumero % coloresTiradas.length]);
-
+  
     // Calcular puntos y dados útiles
     const { puntos, dadosUtiles, indicesUtiles } = calcularPuntosConIndices(dados);
-
+  
     puntosUltimaTirada = puntos;
     puntosTurno += puntos;
     dadosRestantes -= dadosUtiles;
     if(dadosRestantes < 0) dadosRestantes = 0;
-
-    // Crear imágenes dados
-    dados.forEach((valor, idx) => {
+  
+    // Crear imágenes dados (solo dados que puntuaron)
+    indicesUtiles.forEach(idx => {
+      const valor = dados[idx];
       const img = document.createElement("img");
       img.src = `img/dice${valor}.png`;
       img.alt = `Dado ${valor}`;
       img.className = "dice-result";
-
-      if(indicesUtiles.includes(idx)) {
-        img.classList.add("resaltado-actual");
-      } else if(dadosResaltadosPrevios.includes(idx)) {
-        img.classList.add("resaltado-previo");
-      }
-
+      img.classList.add("resaltado-actual");
+  
       tiradaDiv.appendChild(img);
     });
-
+  
     dadosResaltadosPrevios = indicesUtiles;
-
+  
     // Añadir tirada al contenedor
     contenedorResultados.appendChild(tiradaDiv);
-
+  
     // Mostrar puntos de turno y dados restantes
     document.getElementById("puntos-turno").textContent = `Puntos este turno: ${puntosTurno} - Dados restantes: ${dadosRestantes}`;
-
+  
     // Actualizar marcador jugador
     document.getElementById(`jugador${turno}`).textContent = `Jugador ${turno + 1}: ${puntuaciones[turno]}`;
-
+  
     // Si no quedan dados para lanzar o puntos en tirada es 0, se fuerza plantarse automático
     if (dadosRestantes === 0 || puntos === 0) {
       plantarse();
     }
   }
+
 
   function plantarse() {
     puntuaciones[turno] += puntosTurno;
