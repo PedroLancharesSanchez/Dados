@@ -306,7 +306,7 @@
   let dadosResaltadosPrevios = [];
 
   // Duración fija del video en ms (ej: 1500ms)
-  const DURACION_VIDEO = 1500;
+  const DURACION_VIDEO = 2500;
 
   let puntosUltimaTirada = 0;
 
@@ -386,6 +386,12 @@
     video.style.height = "192px";
     video.style.borderRadius = "20px";
     dadoWrapper.appendChild(video);
+
+    const audio = new Audio("sounds/lanzar-dados.mp3");
+      audio.volume = 0.5;
+      audio.play().catch(() => {
+        // Evitar error si no se puede reproducir (por autoplay restrictions)
+      });
 
     // Eliminar video después de DURACION_VIDEO ms
     const timeoutId = setTimeout(() => {
@@ -469,6 +475,9 @@
   
     const contenedorResultados = document.getElementById("resultados-tiradas");
   
+    // Limpiar el contenedor para que solo quede la última tirada visible
+    contenedorResultados.innerHTML = "";
+  
     // Crear contenedor de tirada
     const tiradaDiv = document.createElement("div");
     tiradaDiv.style.display = "flex";
@@ -507,12 +516,23 @@
     // Actualizar marcador jugador
     document.getElementById(`jugador${turno}`).textContent = `Jugador ${turno + 1}: ${puntuaciones[turno]}`;
   
-    // Si no quedan dados para lanzar o puntos en tirada es 0, se fuerza plantarse automático
-    if (dadosRestantes === 0 || puntos === 0) {
+    // Reproducir sonido al procesar tirada
+    reproducirSonido();
+  
+    // Si no quedan dados para lanzar, reiniciar dados a 6 para el mismo jugador
+    if (dadosRestantes === 0) {
+      dadosRestantes = 6; // Reiniciar dados
+      dadosResaltadosPrevios = []; // limpiar resaltados previos para próxima tirada
+      // Mostrar mensaje o simplemente dejar que el jugador lance otra vez con 6 dados
+      // No cambiar turno ni limpiar tiradas para que siga acumulando
+      return; // Salir sin plantarse ni cambiar turno
+    }
+  
+    // Si puntos en tirada es 0, se fuerza plantarse automático
+    if (puntos === 0) {
       plantarse();
     }
   }
-
 
   function plantarse() {
     puntuaciones[turno] += puntosTurno;
