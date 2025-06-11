@@ -75,10 +75,36 @@
       background: white;
       box-shadow: 0 0 8px #bbb;
       transition: transform 0.5s ease;
+      animation: showRoll 0.4s ease;
     }
     .dice img.usado {
       outline: 4px solid #4caf50;
       animation: usadoAnim 2.5s ease;
+    }
+    .dice img.no-usado {
+      opacity: 0.3;
+      animation: noUsadoAnim 2.5s ease forwards;
+    }
+    .box-usados {
+      margin-top: 8px;
+      padding: 6px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+      border-top: 2px solid #4caf50;
+      background-color: #e8fbe8;
+      border-radius: 8px;
+      min-height: 70px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .box-usados img {
+      width: 40px;
+      height: 40px;
+      opacity: 0.9;
+      border-radius: 6px;
+      box-shadow: 0 0 6px #4caf50aa;
     }
     button {
       margin: 12px;
@@ -125,11 +151,19 @@
       50% { transform: scale(1.2); }
       100% { transform: scale(1); }
     }
+    @keyframes noUsadoAnim {
+      0% { opacity: 1; }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
     @keyframes aparecerDesaparecer {
       0% { transform: translate(-50%, -60%) scale(0.8); opacity: 0; }
       10% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
       90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
       100% { transform: translate(-50%, -40%) scale(1.1); opacity: 0; }
+    }
+    @keyframes showRoll {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -143,6 +177,7 @@
       <div class="total" id="total1">Total: 0</div>
       <div class="score" id="score1">Turno: 0</div>
       <div class="dice" id="dice1"></div>
+      <div class="box-usados" id="usados1"></div>
       <div class="dados-restantes" id="restantes1">Dados restantes: 6</div>
       <button onclick="tirar(1)">Tirar</button>
       <button onclick="plantarse(1)">Plantarse</button>
@@ -155,6 +190,7 @@
       <div class="total" id="total2">Total: 0</div>
       <div class="score" id="score2">Turno: 0</div>
       <div class="dice" id="dice2"></div>
+      <div class="box-usados" id="usados2"></div>
       <div class="dados-restantes" id="restantes2">Dados restantes: 6</div>
       <button onclick="tirar(2)">Tirar</button>
       <button onclick="plantarse(2)">Plantarse</button>
@@ -210,18 +246,27 @@
     function mostrarDados(player, dados, usados = []) {
       const diceDiv = document.getElementById(`dice${player}`);
       diceDiv.innerHTML = "";
-      const usadosCopy = [...usados];
 
       dados.forEach(d => {
         const img = document.createElement("img");
         img.src = imgPath(d);
         img.alt = `Dado ${d}`;
-        const indexUsado = usadosCopy.indexOf(d);
-        if (indexUsado !== -1) {
-          img.classList.add("usado");
-          usadosCopy.splice(indexUsado, 1);
-        }
         diceDiv.appendChild(img);
+      });
+
+      // Después de breve delay, mover los dados que puntuaron a la caja de usados
+      setTimeout(() => moverADadosUsados(player, usados), 1000);
+    }
+
+    function moverADadosUsados(player, usados) {
+      const usadosDiv = document.getElementById(`usados${player}`);
+      usadosDiv.innerHTML = ""; // Limpiar dados usados anteriores antes de agregar nuevos
+
+      usados.forEach(d => {
+        const img = document.createElement("img");
+        img.src = imgPath(d);
+        img.alt = `Dado usado ${d}`;
+        usadosDiv.appendChild(img);
       });
     }
 
@@ -250,6 +295,8 @@
         setTimeout(() => {
           mostrarMensajeAnimado(`Jugador ${player} pierde los puntos del turno`, soundFail);
           current[player - 1] = 0;
+          // Limpiar dados usados porque pierde turno
+          document.getElementById(`usados${player}`).innerHTML = "";
           cambiarTurno();
           setButtonsEnabled(true);
         }, 2000);
@@ -280,25 +327,87 @@
       current[player - 1] = 0;
 
       document.getElementById(`total${player}`).textContent = `Total: ${totals[player - 1]}`;
-      document.getElementById(`score${player}`).textContent = "Turno: 0";
-      document.getElementById(`restantes${player}`).textContent = "Dados restantes: 6";
+      document.getElementById(`score${player}`).textContent = `Turno: 0`;
+      document.getElementById(`restantes${player}`).textContent = `Dados restantes: 6`;
+      document.getElementById(`dice${player}`).innerHTML = "";
+      document.getElementById(`usados${player}`).innerHTML = "";
 
       if (totals[player - 1] >= 10000) {
-        playSound(soundWin);
-        alert(`🎉 ¡Jugador ${player} gana con 10.000 puntos!`);
-        resetGame();
-      } else {
-        cambiarTurno();
+        mostrarMensajeAnimado(`¡Jugador ${player} gana!`, soundWin);
+        setButtonsEnabled(false);
+        return;
       }
+
+      cambiarTurno();
+      actualizarTurnoContador();
     }
 
     function cambiarTurno() {
+      // Limpiar dados y dados usados del jugador actual
+      document.getElementById(`dice${turn}`).innerHTML = "";
+      document.getElementById(`usados${turn}`).innerHTML = "";
+      document.getElementById(`score${turn}`).textContent = `Turno: 0`;
+      document.getElementById(`restantes${turn}`).textContent = `Dados restantes: 6`;
+
+      // Cambiar clase de turn para destacar jugador activo
       document.getElementById(`player${turn}`).classList.remove("turn");
-      turn = 3 - turn;
-      dadosRestantes[turn - 1] = 6;
+      turn = turn === 1 ? 2 : 1;
       document.getElementById(`player${turn}`).classList.add("turn");
-      playSound(soundTurn);
-      actualizarTurnoContador();
+    }
+
+    function evaluarTirada(dados) {
+      // contar ocurrencias
+      const counts = {};
+      dados.forEach(d => counts[d] = (counts[d] || 0) + 1);
+
+      // Verificar seis dados iguales
+      for (const face in counts) {
+        if (counts[face] === 6) return { puntos: 10000, usados: dados, win: true };
+      }
+
+      let puntos = 0;
+      const usados = [];
+
+      // Escalera 1-6
+      const esEscalera = [1,2,3,4,5,6].every(n => counts[n] === 1);
+      if (esEscalera) {
+        puntos += 1500;
+        usados.push(...dados);
+        return { puntos, usados, win: false, mensaje: "Escalera 1-6" };
+      }
+
+      // Tres pares
+      const pares = Object.values(counts).filter(c => c === 2).length;
+      if (pares === 3) {
+        puntos += 1500;
+        usados.push(...dados);
+        return { puntos, usados, win: false, mensaje: "Tres pares" };
+      }
+
+      // Tres o más iguales
+      for (const face in counts) {
+        const c = counts[face];
+        if (c >= 3) {
+          let base = 0;
+          if (face == 1) base = 1000;
+          else base = face * 100;
+          puntos += base * Math.pow(2, c - 3);
+          usados.push(...Array(c).fill(parseInt(face)));
+          counts[face] -= c; // descontar contados
+        }
+      }
+
+      // Unos y cincos sueltos
+      if (counts[1]) {
+        puntos += counts[1] * 100;
+        usados.push(...Array(counts[1]).fill(1));
+      }
+      if (counts[5]) {
+        puntos += counts[5] * 50;
+        usados.push(...Array(counts[5]).fill(5));
+      }
+
+      return { puntos, usados, win: false };
     }
 
     function resetGame() {
@@ -307,57 +416,17 @@
       dadosRestantes = [6, 6];
       turn = 1;
       turnCount = 1;
+
       document.getElementById("turnCount").textContent = turnCount;
-
-      for (let i = 1; i <= 2; i++) {
-        document.getElementById(`total${i}`).textContent = "Total: 0";
-        document.getElementById(`score${i}`).textContent = "Turno: 0";
-        document.getElementById(`dice${i}`).innerHTML = "";
-        document.getElementById(`restantes${i}`).textContent = "Dados restantes: 6";
-        document.getElementById(`player${i}`).classList.remove("turn");
+      for(let p=1; p<=2; p++) {
+        document.getElementById(`total${p}`).textContent = "Total: 0";
+        document.getElementById(`score${p}`).textContent = "Turno: 0";
+        document.getElementById(`dice${p}`).innerHTML = "";
+        document.getElementById(`usados${p}`).innerHTML = "";
+        document.getElementById(`restantes${p}`).textContent = "Dados restantes: 6";
+        document.getElementById(`player${p}`).classList.toggle("turn", p === 1);
       }
-      document.getElementById("player1").classList.add("turn");
-    }
-
-    function evaluarTirada(dados) {
-      const conteo = {};
-      dados.forEach(d => conteo[d] = (conteo[d] || 0) + 1);
-      let puntos = 0;
-      let usados = [];
-      let mensaje = null;
-
-      const valores = Object.values(conteo);
-      const claves = Object.keys(conteo).map(Number);
-
-      if (dados.length === 6) {
-        const esEscalera = claves.length === 6 && claves.sort().toString() === "1,2,3,4,5,6";
-        const esTresParejas = valores.filter(v => v === 2).length === 3;
-        const esDosTrios = valores.filter(v => v === 3).length === 2;
-        const esSeisIguales = valores.includes(6);
-
-        if (esSeisIguales) return { puntos: 0, usados: dados, win: true };
-        if (esEscalera) return { puntos: 1500, usados: dados, mensaje: "¡Escalera! +1500 puntos" };
-        if (esTresParejas) return { puntos: 1500, usados: dados, mensaje: "¡Tres parejas! +1500 puntos" };
-        if (esDosTrios) return { puntos: 2500, usados: dados, mensaje: "¡Dos tríos! +2500 puntos" };
-      }
-
-      for (let num = 1; num <= 6; num++) {
-        let count = conteo[num] || 0;
-        if (count >= 6) return { puntos: 0, usados: dados, win: true };
-        else if (count === 5) { puntos += 2000; usados.push(...Array(5).fill(num)); }
-        else if (count === 4) { puntos += 1000; usados.push(...Array(4).fill(num)); }
-        else if (count === 3) { puntos += (num === 1 ? 300 : num * 100); usados.push(...Array(3).fill(num)); }
-      }
-
-      for (let num of [1, 5]) {
-        const count = (conteo[num] || 0) - usados.filter(x => x === num).length;
-        if (count > 0) {
-          puntos += num === 1 ? count * 100 : count * 50;
-          usados.push(...Array(count).fill(num));
-        }
-      }
-
-      return { puntos, usados, win: false, mensaje };
+      setButtonsEnabled(true);
     }
   </script>
 </body>
