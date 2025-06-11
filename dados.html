@@ -7,7 +7,6 @@
     * {
       box-sizing: border-box;
     }
-
     body {
       margin: 0;
       padding: 0;
@@ -17,7 +16,6 @@
       height: 100vh;
       overflow: hidden;
     }
-
     .player {
       flex: 1;
       display: flex;
@@ -27,7 +25,6 @@
       border-bottom: 2px solid #000;
       overflow: hidden;
     }
-
     .content {
       transform: rotate(90deg);
       display: flex;
@@ -35,35 +32,24 @@
       align-items: center;
       justify-content: center;
     }
-
     .turn {
       background-color: #e0ffe0;
     }
-
     h2 {
       font-size: 2em;
       margin: 10px 0;
     }
-
-    .score {
+    .score, .total, .dice, .dados-restantes {
       font-size: 1.8em;
       margin: 5px 0;
     }
-
     .total {
-      font-size: 2.2em;
       font-weight: bold;
-      margin: 5px 0;
+      font-size: 2.2em;
     }
-
-    .dice {
-      font-size: 2em;
-      margin: 10px 0;
-    }
-
     button {
       margin: 10px;
-      padding: 20px 40px; /* Botones grandes */
+      padding: 20px 40px;
       font-size: 1.5em;
       border: none;
       border-radius: 10px;
@@ -71,7 +57,6 @@
       color: white;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #666;
     }
@@ -85,6 +70,7 @@
       <div class="total" id="total1">Total: 0</div>
       <div class="score" id="score1">Turno: 0</div>
       <div class="dice" id="dice1">🎲</div>
+      <div class="dados-restantes" id="restantes1">Dados restantes: 6</div>
       <button onclick="tirar(1)">Tirar</button>
       <button onclick="plantarse(1)">Plantarse</button>
     </div>
@@ -96,6 +82,7 @@
       <div class="total" id="total2">Total: 0</div>
       <div class="score" id="score2">Turno: 0</div>
       <div class="dice" id="dice2">🎲</div>
+      <div class="dados-restantes" id="restantes2">Dados restantes: 6</div>
       <button onclick="tirar(2)">Tirar</button>
       <button onclick="plantarse(2)">Plantarse</button>
     </div>
@@ -104,30 +91,44 @@
   <script>
     let totals = [0, 0];
     let current = [0, 0];
+    let dadosRestantes = [6, 6];
     let turn = 1;
-    let turnStartTotal = [0, 0];
 
     function tirar(player) {
       if (player !== turn) return;
 
-      turnStartTotal[player - 1] = totals[player - 1];
+      const diceCount = Math.max(1, dadosRestantes[player - 1]);
+      const dados = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
+      const { puntos, usados, win, mensaje } = evaluarTirada(dados);
 
-      const dados = [];
-      for (let i = 0; i < 6; i++) {
-        dados.push(Math.floor(Math.random() * 6) + 1);
+      document.getElementById(`dice${player}`).textContent = `🎲 ${dados.join(', ')}`;
+
+      if (win) {
+        alert(`🎉 ¡Jugador ${player} gana automáticamente con 6 dados iguales!`);
+        resetGame();
+        return;
       }
 
-      const puntos = dados.reduce((sum, val) => sum + val, 0);
+      if (puntos === 0) {
+        alert(`Jugador ${player} no ha puntuado. ¡Pierde los puntos del turno!`);
+        current[player - 1] = 0;
+        cambiarTurno();
+        return;
+      }
+
       current[player - 1] += puntos;
-      const nuevaTotal = totals[player - 1] + current[player - 1];
 
       document.getElementById(`score${player}`).textContent = `Turno: ${current[player - 1]}`;
-      document.getElementById(`dice${player}`).textContent = `🎲 ${dados.join(", ")}`;
 
-      if (nuevaTotal > 10000) {
-        alert(`¡Jugador ${player} se pasó! Vuelve a ${turnStartTotal[player - 1]} puntos.`);
-        current[player - 1] = 0;
-        plantarse(player);
+      // Calcular dados restantes
+      let restantes = dados.length - usados.length;
+      if (restantes === 0) restantes = 6;
+      dadosRestantes[player - 1] = restantes;
+
+      document.getElementById(`restantes${player}`).textContent = `Dados restantes: ${restantes}`;
+
+      if (mensaje) {
+        alert(mensaje);
       }
     }
 
@@ -139,11 +140,13 @@
 
       document.getElementById(`total${player}`).textContent = `Total: ${totals[player - 1]}`;
       document.getElementById(`score${player}`).textContent = `Turno: 0`;
+      document.getElementById(`restantes${player}`).textContent = `Dados restantes: 6`;
 
-      if (totals[player - 1] === 10000) {
-        alert(`🎉 ¡Jugador ${player} gana con exactamente 10,000 puntos!`);
+      if (totals[player - 1] >= 10000) {
+        alert(`🎉 ¡Jugador ${player} gana con 10.000 puntos!`);
         resetGame();
       } else {
+        dadosRestantes[player - 1] = 6;
         cambiarTurno();
       }
     }
@@ -157,16 +160,69 @@
     function resetGame() {
       totals = [0, 0];
       current = [0, 0];
+      dadosRestantes = [6, 6];
       turn = 1;
-      turnStartTotal = [0, 0];
-      document.getElementById("total1").textContent = "Total: 0";
-      document.getElementById("total2").textContent = "Total: 0";
-      document.getElementById("score1").textContent = "Turno: 0";
-      document.getElementById("score2").textContent = "Turno: 0";
-      document.getElementById("dice1").textContent = "🎲";
-      document.getElementById("dice2").textContent = "🎲";
+
+      for (let i = 1; i <= 2; i++) {
+        document.getElementById(`total${i}`).textContent = "Total: 0";
+        document.getElementById(`score${i}`).textContent = "Turno: 0";
+        document.getElementById(`dice${i}`).textContent = "🎲";
+        document.getElementById(`restantes${i}`).textContent = "Dados restantes: 6";
+        document.getElementById(`player${i}`).classList.remove("turn");
+      }
       document.getElementById("player1").classList.add("turn");
-      document.getElementById("player2").classList.remove("turn");
+    }
+
+    function evaluarTirada(dados) {
+      const conteo = {};
+      dados.forEach(d => conteo[d] = (conteo[d] || 0) + 1);
+      let puntos = 0;
+      let usados = [];
+      let mensaje = null;
+
+      const valores = Object.values(conteo);
+      const claves = Object.keys(conteo).map(Number);
+
+      // Combinaciones especiales (solo con 6 dados)
+      if (dados.length === 6) {
+        const esEscalera = claves.length === 6 && claves.sort().toString() === "1,2,3,4,5,6";
+        const esTresParejas = valores.filter(v => v === 2).length === 3;
+        const esDosTrios = valores.filter(v => v === 3).length === 2;
+        const esSeisIguales = valores.includes(6);
+
+        if (esSeisIguales) return { puntos: 0, usados: dados, win: true };
+        if (esEscalera) return { puntos: 1500, usados: dados, mensaje: "¡Escalera! +1500 puntos" };
+        if (esTresParejas) return { puntos: 1500, usados: dados, mensaje: "¡Tres parejas! +1500 puntos" };
+        if (esDosTrios) return { puntos: 2500, usados: dados, mensaje: "¡Dos tríos! +2500 puntos" };
+      }
+
+      for (let num = 1; num <= 6; num++) {
+        let count = conteo[num] || 0;
+
+        if (count >= 6) {
+          return { puntos: 0, usados: dados, win: true };
+        } else if (count === 5) {
+          puntos += 2000;
+          usados.push(...Array(5).fill(num));
+        } else if (count === 4) {
+          puntos += 1000;
+          usados.push(...Array(4).fill(num));
+        } else if (count === 3) {
+          puntos += (num === 1 ? 300 : num * 100);
+          usados.push(...Array(3).fill(num));
+        }
+      }
+
+      // Unos y cincos individuales
+      for (let num of [1, 5]) {
+        const count = (conteo[num] || 0) - usados.filter(x => x === num).length;
+        if (count > 0) {
+          puntos += num === 1 ? count * 100 : count * 50;
+          usados.push(...Array(count).fill(num));
+        }
+      }
+
+      return { puntos, usados, win: false };
     }
   </script>
 </body>
