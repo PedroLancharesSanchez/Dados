@@ -80,10 +80,6 @@
       outline: 4px solid #4caf50;
       animation: usadoAnim 2.5s ease;
     }
-    .dice img.no-usado {
-      opacity: 0.3;
-      animation: noUsadoAnim 2.5s ease forwards;
-    }
     button {
       margin: 12px;
       padding: 25px 60px;
@@ -128,10 +124,6 @@
       0% { transform: scale(1); }
       50% { transform: scale(1.2); }
       100% { transform: scale(1); }
-    }
-    @keyframes noUsadoAnim {
-      0% { opacity: 1; }
-      100% { opacity: 0; transform: scale(0.5); }
     }
     @keyframes aparecerDesaparecer {
       0% { transform: translate(-50%, -60%) scale(0.8); opacity: 0; }
@@ -218,16 +210,16 @@
     function mostrarDados(player, dados, usados = []) {
       const diceDiv = document.getElementById(`dice${player}`);
       diceDiv.innerHTML = "";
+      const usadosCopy = [...usados];
+
       dados.forEach(d => {
         const img = document.createElement("img");
         img.src = imgPath(d);
         img.alt = `Dado ${d}`;
-        const indexUsado = usados.indexOf(d);
+        const indexUsado = usadosCopy.indexOf(d);
         if (indexUsado !== -1) {
           img.classList.add("usado");
-          usados.splice(indexUsado, 1);
-        } else {
-          img.classList.add("no-usado");
+          usadosCopy.splice(indexUsado, 1);
         }
         diceDiv.appendChild(img);
       });
