@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Juego de Dados</title>
   <style>
     body {
@@ -78,6 +78,9 @@
       height: 80px;
       object-fit: contain;
       border-radius: 10px;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
 
     #turno-actual {
@@ -93,11 +96,6 @@
       text-align: center;
     }
 
-    #video-lanzamiento {
-      display: none;
-      max-width: 300px;
-      margin: 20px auto;
-    }
   </style>
 </head>
 <body>
@@ -111,146 +109,187 @@
 
   <div id="turno-actual"></div>
 
-  <video id="video-lanzamiento" muted>
-    <source src="video/lanzar.mp4" type="video/mp4">
-    Tu navegador no soporta la etiqueta de video.
-  </video>
-
   <div class="dice-container" id="dados"></div>
 
-  <div class="controls">
+  <div class="controls" style="display:none;">
     <button onclick="lanzarDados()">🎲 Lanzar Dados</button>
     <button onclick="plantarse()">✋ Plantarse</button>
   </div>
 
   <div id="puntos-turno"></div>
 
-  <script>
-    let jugadores = 0;
-    let puntuaciones = [];
-    let turno = 0;
-    let puntosTurno = 0;
-    let dadosRestantes = 6;
+<script>
+  let jugadores = 0;
+  let puntuaciones = [];
+  let turno = 0;
+  let puntosTurno = 0;
+  let dadosRestantes = 6;
 
-    function selectPlayers(count) {
-      jugadores = count;
-      puntuaciones = Array(count).fill(0);
+  function selectPlayers(count) {
+    jugadores = count;
+    puntuaciones = Array(count).fill(0);
 
-      document.querySelector("h1").style.display = "none";
-      document.querySelector(".player-select").style.display = "none";
+    document.querySelector("h1").style.display = "none";
+    document.querySelector(".player-select").style.display = "none";
 
-      const posiciones = ["p1", "p2", "p3", "p4"];
-      for (let i = 0; i < count; i++) {
-        const marcador = document.createElement("div");
-        marcador.className = `score ${posiciones[i]}`;
-        marcador.id = `jugador${i}`;
-        marcador.textContent = `Jugador ${i + 1}: 0`;
-        document.body.appendChild(marcador);
-      }
-
-      document.querySelector(".controls").style.display = "flex";
-      mostrarTurno();
+    const posiciones = ["p1", "p2", "p3", "p4"];
+    for (let i = 0; i < count; i++) {
+      const marcador = document.createElement("div");
+      marcador.className = `score ${posiciones[i]}`;
+      marcador.id = `jugador${i}`;
+      marcador.textContent = `Jugador ${i + 1}: 0`;
+      document.body.appendChild(marcador);
     }
 
-    function mostrarTurno() {
-      document.getElementById("turno-actual").textContent = `Turno de Jugador ${turno + 1}`;
-    }
+    document.querySelector(".controls").style.display = "flex";
+    mostrarTurno();
+  }
 
-    function lanzarDados() {
-      const cantidad = dadosRestantes;
-      const dados = Array.from({ length: cantidad }, () => Math.floor(Math.random() * 6) + 1);
+  function mostrarTurno() {
+    document.getElementById("turno-actual").textContent = `Turno de Jugador ${turno + 1}`;
+  }
 
-      const video = document.getElementById("video-lanzamiento");
-      const sonido = new Audio("sounds/lanzar-dados.mp3");
+  function mostrarDados(valores) {
+    const contenedor = document.getElementById("dados");
+    contenedor.innerHTML = "";
 
-      document.getElementById("dados").style.display = "none";
-      video.style.display = "block";
-      video.currentTime = 0;
-      video.play();
-      sonido.play();
+    valores.forEach((valor) => {
+      const dadoWrapper = document.createElement("div");
+      dadoWrapper.style.position = "relative";
+      dadoWrapper.style.width = "80px";
+      dadoWrapper.style.height = "80px";
 
-      video.onended = () => {
-        video.style.display = "none";
-        document.getElementById("dados").style.display = "flex";
-        mostrarDados(dados);
-        procesarPuntos(dados);
-      };
-    }
+      const img = document.createElement("img");
+      img.src = `img/dice${valor}.png`;
+      img.alt = `Dado ${valor}`;
+      img.className = "dice";
 
-    function procesarPuntos(dados) {
-      const { puntos, dadosUtiles } = calcularPuntos(dados);
-      if (puntos === 0) {
-        alert("¡Sin puntos! Turno perdido.");
-        puntosTurno = 0;
-        pasarTurno();
+      dadoWrapper.appendChild(img);
+      contenedor.appendChild(dadoWrapper);
+    });
+  }
+
+  function animarDado(dadoWrapper, callback) {
+    const video = document.createElement("video");
+    video.src = "video/lanzar.mp4";
+    video.muted = true;
+    video.style.position = "absolute";
+    video.style.top = "0";
+    video.style.left = "0";
+    video.style.width = "80px";
+    video.style.height = "80px";
+    video.style.zIndex = "10";
+
+    dadoWrapper.appendChild(video);
+
+    const sonido = new Audio("sounds/lanzar-dados.mp3");
+
+    // Esperar a cargar metadatos para sincronizar duraciones
+    sonido.addEventListener("loadedmetadata", () => {
+      if (video.readyState >= 2) {
+        ajustarDuracion();
       } else {
-        puntosTurno += puntos;
-        dadosRestantes = dados.length - dadosUtiles;
-        if (dadosRestantes === 0) {
-          dadosRestantes = 6;
+        video.addEventListener("loadedmetadata", ajustarDuracion);
+      }
+
+      function ajustarDuracion() {
+        // Ajustamos playbackRate para que el video dure 0.5s menos que el audio
+        const nuevaDuracion = sonido.duration - 0.5;
+        video.playbackRate = video.duration / nuevaDuracion;
+        video.play().catch(() => {});
+        sonido.play().catch(() => {});
+      }
+    });
+
+    video.onended = () => {
+      dadoWrapper.removeChild(video);
+      if (typeof callback === "function") callback();
+    };
+  }
+
+  function lanzarDados() {
+    const cantidad = dadosRestantes;
+    const dados = Array.from({ length: cantidad }, () => Math.floor(Math.random() * 6) + 1);
+
+    const contenedor = document.getElementById("dados");
+    contenedor.style.display = "flex";
+    mostrarDados(dados);
+
+    let animacionesPendientes = cantidad;
+
+    for (let i = 0; i < cantidad; i++) {
+      const dadoWrapper = contenedor.children[i];
+      animarDado(dadoWrapper, () => {
+        animacionesPendientes--;
+        if (animacionesPendientes === 0) {
+          procesarPuntos(dados);
         }
-        document.getElementById("puntos-turno").textContent = `Puntos en este turno: ${puntosTurno}`;
-      }
-    }
-
-    function plantarse() {
-      puntuaciones[turno] += puntosTurno;
-      actualizarMarcadores();
-      puntosTurno = 0;
-      dadosRestantes = 6;
-      pasarTurno();
-    }
-
-    function pasarTurno() {
-      turno = (turno + 1) % jugadores;
-      dadosRestantes = 6;
-      mostrarTurno();
-      document.getElementById("puntos-turno").textContent = "";
-      document.getElementById("dados").innerHTML = "";
-    }
-
-    function actualizarMarcadores() {
-      for (let i = 0; i < jugadores; i++) {
-        document.getElementById(`jugador${i}`).textContent = `Jugador ${i + 1}: ${puntuaciones[i]}`;
-      }
-    }
-
-    function mostrarDados(valores) {
-      const contenedor = document.getElementById("dados");
-      contenedor.innerHTML = "";
-      valores.forEach(valor => {
-        const img = document.createElement("img");
-        img.src = `img/dice${valor}.png`;
-        img.alt = `Dado ${valor}`;
-        img.className = "dice";
-        contenedor.appendChild(img);
       });
     }
+  }
 
-    function calcularPuntos(dados) {
-      let puntos = 0;
-      let cuenta = {};
-      dados.forEach(d => cuenta[d] = (cuenta[d] || 0) + 1);
-
-      let dadosUtiles = 0;
-
-      for (let i = 1; i <= 6; i++) {
-        const cantidad = cuenta[i] || 0;
-        if (cantidad >= 3) {
-          puntos += i === 1 ? 300 : i * 100;
-          dadosUtiles += 3;
-          if (cantidad >= 4) { puntos += 1000; dadosUtiles += 1; }
-          if (cantidad === 5) { puntos += 1000; dadosUtiles += 1; }
-        }
+  function procesarPuntos(dados) {
+    const { puntos, dadosUtiles } = calcularPuntos(dados);
+    if (puntos === 0) {
+      alert("¡Sin puntos! Turno perdido.");
+      puntosTurno = 0;
+      pasarTurno();
+    } else {
+      puntosTurno += puntos;
+      dadosRestantes = dados.length - dadosUtiles;
+      if (dadosRestantes === 0) {
+        dadosRestantes = 6;
       }
-
-      puntos += (cuenta[1] || 0) < 3 ? (cuenta[1] || 0) * 100 : 0;
-      puntos += (cuenta[5] || 0) < 3 ? (cuenta[5] || 0) * 50 : 0;
-      dadosUtiles += (cuenta[1] || 0) < 3 ? (cuenta[1] || 0) : 0;
-      dadosUtiles += (cuenta[5] || 0) < 3 ? (cuenta[5] || 0) : 0;
-
-      return { puntos, dadosUtiles };
+      document.getElementById("puntos-turno").textContent = `Puntos en este turno: ${puntosTurno}`;
     }
-  </script>
+  }
+
+  function plantarse() {
+    puntuaciones[turno] += puntosTurno;
+    actualizarMarcadores();
+    puntosTurno = 0;
+    dadosRestantes = 6;
+    pasarTurno();
+  }
+
+  function pasarTurno() {
+    turno = (turno + 1) % jugadores;
+    dadosRestantes = 6;
+    mostrarTurno();
+    document.getElementById("puntos-turno").textContent = "";
+    document.getElementById("dados").innerHTML = "";
+  }
+
+  function actualizarMarcadores() {
+    for (let i = 0; i < jugadores; i++) {
+      document.getElementById(`jugador${i}`).textContent = `Jugador ${i + 1}: ${puntuaciones[i]}`;
+    }
+  }
+
+  function calcularPuntos(dados) {
+    let puntos = 0;
+    let cuenta = {};
+    dados.forEach(d => cuenta[d] = (cuenta[d] || 0) + 1);
+
+    let dadosUtiles = 0;
+
+    for (let i = 1; i <= 6; i++) {
+      const cantidad = cuenta[i] || 0;
+      if (cantidad >= 3) {
+        puntos += i === 1 ? 300 : i * 100;
+        dadosUtiles += 3;
+        if (cantidad >= 4) { puntos += 1000; dadosUtiles += 1; }
+        if (cantidad === 5) { puntos += 1000; dadosUtiles += 1; }
+      }
+    }
+
+    puntos += (cuenta[1] || 0) < 3 ? (cuenta[1] || 0) * 100 : 0;
+    puntos += (cuenta[5] || 0) < 3 ? (cuenta[5] || 0) * 50 : 0;
+    dadosUtiles += (cuenta[1] || 0) < 3 ? (cuenta[1] || 0) : 0;
+    dadosUtiles += (cuenta[5] || 0) < 3 ? (cuenta[5] || 0) : 0;
+
+    return { puntos, dadosUtiles };
+  }
+</script>
 </body>
 </html>
