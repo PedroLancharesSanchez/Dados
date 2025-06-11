@@ -64,6 +64,7 @@
       display: flex;
       gap: 8px;
       justify-content: center;
+      flex-wrap: wrap;
     }
     .dice img {
       width: 60px;
@@ -108,7 +109,7 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: rotate(90deg) translate(-50%, -50%);
       background: rgba(220, 0, 0, 0.9);
       color: white;
       padding: 20px 40px;
@@ -134,10 +135,10 @@
       100% { opacity: 0; transform: scale(0.5); }
     }
     @keyframes aparecerDesaparecer {
-      0% { transform: translate(-50%, -60%) scale(0.8); opacity: 0; }
-      10% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-      90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-      100% { transform: translate(-50%, -40%) scale(1.1); opacity: 0; }
+      0% { transform: rotate(90deg) translate(-50%, -60%) scale(0.8); opacity: 0; }
+      10% { transform: rotate(90deg) translate(-50%, -50%) scale(1); opacity: 1; }
+      90% { transform: rotate(90deg) translate(-50%, -50%) scale(1); opacity: 1; }
+      100% { transform: rotate(90deg) translate(-50%, -40%) scale(1.1); opacity: 0; }
     }
   </style>
 </head>
@@ -180,6 +181,7 @@
     let totals = [0, 0];
     let current = [0, 0];
     let dadosRestantes = [6, 6];
+    let dadosAcumulados = [[], []];
     let turn = 1;
     let turnCount = 1;
 
@@ -236,7 +238,10 @@
     function tirar(player) {
       if (player !== turn) return;
 
-      if (current[player - 1] === 0) dadosRestantes[player - 1] = 6;
+      if (current[player - 1] === 0) {
+        dadosRestantes[player - 1] = 6;
+        dadosAcumulados[player - 1] = [];
+      }
 
       const diceCount = Math.max(1, dadosRestantes[player - 1]);
       const dados = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
@@ -253,11 +258,12 @@
       }
 
       if (puntos === 0) {
-        mostrarDados(player, dados, []);
+        mostrarDados(player, dadosAcumulados[player - 1].concat(dados), []);
         setButtonsEnabled(false);
         setTimeout(() => {
           mostrarMensajeAnimado(`Jugador ${player} pierde los puntos del turno`, soundFail);
           current[player - 1] = 0;
+          dadosAcumulados[player - 1] = [];
           cambiarTurno();
           setButtonsEnabled(true);
         }, 2000);
@@ -265,14 +271,19 @@
       }
 
       setButtonsEnabled(false);
-      mostrarDados(player, dados, [...usados]);
+      dadosAcumulados[player - 1].push(...usados);
+      mostrarDados(player, dadosAcumulados[player - 1].concat(dados), [...usados]);
 
       setTimeout(() => {
         current[player - 1] += puntos;
         document.getElementById(`score${player}`).textContent = `Turno: ${current[player - 1]}`;
 
         let restantes = dados.length - usados.length;
-        if (restantes === 0) restantes = 6;
+        if (restantes === 0) {
+          restantes = 6;
+          dadosAcumulados[player - 1] = [];
+        }
+
         dadosRestantes[player - 1] = restantes;
         document.getElementById(`restantes${player}`).textContent = `Dados restantes: ${restantes}`;
 
@@ -286,6 +297,7 @@
 
       totals[player - 1] += current[player - 1];
       current[player - 1] = 0;
+      dadosAcumulados[player - 1] = [];
 
       document.getElementById(`total${player}`).textContent = `Total: ${totals[player - 1]}`;
       document.getElementById(`score${player}`).textContent = "Turno: 0";
@@ -313,6 +325,7 @@
       totals = [0, 0];
       current = [0, 0];
       dadosRestantes = [6, 6];
+      dadosAcumulados = [[], []];
       turn = 1;
       turnCount = 1;
       document.getElementById("turnCount").textContent = turnCount;
