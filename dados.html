@@ -4,46 +4,53 @@
   <meta charset="UTF-8" />
   <title>Juego de Dados</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
       font-family: sans-serif;
-      height: 100vh;
       background: white;
+      overflow-x: hidden;
+    }
+
+    body {
       display: flex;
       flex-direction: column;
-      justify-content: center; /* Centra vertical */
-      align-items: center;     /* Centra horizontal */
-      overflow-x: hidden;
+      justify-content: center;
+      align-items: center;
       position: relative;
-      padding: 0;
+      min-height: 100vh;
+      box-sizing: border-box;
+      padding: 20px;
     }
 
     h1 {
       margin-bottom: 40px;
-      font-size: 6em; /* el doble de 3em */
+      font-size: 6em;
       text-align: center;
+      line-height: 1.1;
     }
 
     .player-select,
     .controls {
       display: flex;
       flex-direction: column;
-      gap: 40px; /* el doble */
+      gap: 40px;
       align-items: center;
       justify-content: center;
       margin-bottom: 60px;
-      position: relative;
       z-index: 20;
     }
 
     button {
-      padding: 40px 80px; /* doble */
-      font-size: 4.4em; /* doble */
+      padding: 40px 80px;
+      font-size: 4.4em;
       cursor: pointer;
       border-radius: 20px;
       border: 2px solid #333;
       background-color: white;
       transition: background 0.2s ease;
+      min-width: 280px;
     }
 
     button:hover {
@@ -51,93 +58,99 @@
     }
 
     .score {
-      position: absolute;
+      position: fixed;
       background: white;
-      padding: 20px 40px; /* doble */
+      padding: 20px 40px;
       border: 2px solid black;
       border-radius: 20px;
-      min-width: 280px; /* doble */
+      min-width: 280px;
       text-align: center;
       font-weight: bold;
-      font-size: 4em; /* doble */
-      z-index: 10;
+      font-size: 4em;
       box-sizing: border-box;
+      z-index: 100;
+      user-select: none;
     }
 
-    /* Mantener puntuaciones en esquinas, con algo más de margen para que no queden pegadas */
-    .p1 { top: 20px; left: 20px; }
-    .p2 { top: 20px; right: 20px; }
-    .p3 { bottom: 20px; left: 20px; }
-    .p4 { bottom: 20px; right: 20px; }
+    /* Posiciones fijas en esquinas */
+    .p1 { top: 0; left: 0; border-top-left-radius: 0; }
+    .p2 { top: 0; right: 0; border-top-right-radius: 0; }
+    .p3 { bottom: 0; left: 0; border-bottom-left-radius: 0; }
+    .p4 { bottom: 0; right: 0; border-bottom-right-radius: 0; }
 
     .dice-container {
       display: flex;
-      flex-wrap: wrap;
-      gap: 30px; /* doble */
+      flex-wrap: nowrap;
+      gap: 30px;
       justify-content: center;
-      margin: 40px 0; /* doble */
+      margin: 40px 0;
       position: relative;
-      height: 200px; /* doble */
-      width: 1200px; /* doble */
+      height: 200px;
+      width: 1200px;
       z-index: 15;
     }
 
     .dice {
-      width: 160px; /* doble */
-      height: 160px; /* doble */
+      width: 160px;
+      height: 160px;
       object-fit: contain;
       border-radius: 20px;
       position: absolute;
       top: 0;
       left: 0;
       transition: box-shadow 0.3s ease;
+      user-select: none;
     }
 
     #turno-actual {
       font-weight: bold;
-      font-size: 5em; /* doble */
+      font-size: 5em;
       margin-bottom: 20px;
       z-index: 20;
       text-align: center;
       width: 100%;
+      user-select: none;
     }
 
     #puntos-turno {
-      margin-top: 30px; /* doble */
+      margin-top: 30px;
       font-style: italic;
-      font-size: 4em; /* doble */
+      font-size: 4em;
       text-align: center;
       z-index: 20;
       width: 100%;
+      user-select: none;
     }
 
     #resultados-tiradas {
-      margin-top: 40px; /* doble */
+      margin-top: 40px;
       display: flex;
-      gap: 30px; /* doble */
-      min-height: 200px; /* doble */
-      width: 1200px; /* doble */
+      gap: 30px;
+      min-height: 200px;
+      width: 1200px;
       flex-wrap: wrap;
       justify-content: center;
       border: 2px solid #333;
-      padding: 20px; /* doble */
+      padding: 20px;
       border-radius: 20px;
       background: #fafafa;
       position: relative;
       z-index: 10;
       box-sizing: border-box;
+      user-select: none;
     }
 
     .dice-result {
-      width: 120px !important; /* doble 60px */
+      width: 120px !important;
       height: 120px !important;
       position: relative !important;
       top: auto !important;
       left: auto !important;
       box-shadow: 0 0 20px 8px green;
       border-radius: 20px;
-      margin: 0 10px; /* doble */
+      margin: 0 10px;
       transition: box-shadow 0.3s ease;
+      user-select: none;
     }
 
     .color1 { box-shadow: 0 0 30px 8px #4CAF50 !important; }
@@ -153,6 +166,95 @@
 
     .resaltado-previo {
       box-shadow: 0 0 30px 8px #2196F3 !important;
+    }
+
+    /* Video ajustado para el dado */
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 160px;
+      height: 160px;
+      z-index: 10;
+      clip-path: none;
+      user-select: none;
+    }
+
+    /* Responsive móvil */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 3em;
+        margin-bottom: 20px;
+      }
+
+      .player-select,
+      .controls {
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      button {
+        padding: 20px 40px;
+        font-size: 2.2em;
+        min-width: 160px;
+      }
+
+      .score {
+        font-size: 2.5em;
+        padding: 10px 20px;
+        min-width: 150px;
+      }
+
+      .dice-container {
+        position: relative;
+        width: 100%;
+        height: auto;
+        gap: 15px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+        justify-content: center;
+        height: auto;
+      }
+
+      .dice {
+        position: relative !important;
+        width: 80px !important;
+        height: 80px !important;
+        top: auto !important;
+        left: auto !important;
+      }
+
+      #resultados-tiradas {
+        width: 100%;
+        min-height: 120px;
+        margin-top: 20px;
+        padding: 10px;
+      }
+
+      .dice-result {
+        width: 60px !important;
+        height: 60px !important;
+        margin: 0 5px;
+      }
+
+      #turno-actual {
+        font-size: 3em;
+        margin-bottom: 10px;
+      }
+
+      #puntos-turno {
+        font-size: 2.5em;
+        margin-top: 10px;
+      }
+
+      .score.p1 { top: 0; left: 0; }
+      .score.p2 { top: 0; right: 0; }
+      .score.p3 { bottom: 0; left: 0; }
+      .score.p4 { bottom: 0; right: 0; }
     }
   </style>
 </head>
@@ -185,8 +287,8 @@
   let puntosTurno = 0;
   let dadosRestantes = 6;
 
-  let tiradaNumero = 0;
-  let coloresTiradas = ["color1","color2","color3","color4","color5","color6"];
+  let tiradaNumero = -1;
+  const coloresTiradas = ["color1","color2","color3","color4","color5","color6"];
 
   let dadosResaltadosPrevios = [];
 
@@ -198,6 +300,11 @@
     document.querySelector(".player-select").style.display = "none";
 
     const posiciones = ["p1", "p2", "p3", "p4"];
+    // Remover marcadores antiguos si existen
+    for(let i = 0; i < 4; i++) {
+      const old = document.getElementById(`jugador${i}`);
+      if(old) old.remove();
+    }
     for (let i = 0; i < count; i++) {
       const marcador = document.createElement("div");
       marcador.className = `score ${posiciones[i]}`;
@@ -221,12 +328,15 @@
     valores.forEach((valor, idx) => {
       const dadoWrapper = document.createElement("div");
       dadoWrapper.style.position = "relative";
-      dadoWrapper.style.width = "160px"; // doble
-      dadoWrapper.style.height = "160px"; // doble
+      dadoWrapper.style.width = "160px";
+      dadoWrapper.style.height = "160px";
 
-      dadoWrapper.style.position = "absolute";
-      dadoWrapper.style.left = `${idx * 180}px`; // doble distancia + 10 extra para separación
-      dadoWrapper.style.top = `0`;
+      // En móvil posición relativa, en escritorio absoluta para que no se superpongan
+      if(window.innerWidth > 768) {
+        dadoWrapper.style.position = "absolute";
+        dadoWrapper.style.left = `${idx * 180}px`;
+        dadoWrapper.style.top = `0`;
+      }
 
       const img = document.createElement("img");
       img.src = `img/dice${valor}.png`;
@@ -242,17 +352,12 @@
     const video = document.createElement("video");
     video.src = "video/lanzar.mp4";
     video.muted = true;
-
-    // Ajustamos tamaño del video para cubrir exactamente 160x160px dado
     video.style.position = "absolute";
     video.style.top = "0";
     video.style.left = "0";
-    video.style.width = "160px";
-    video.style.height = "160px";
+    video.style.width = dadoWrapper.clientWidth + "px";
+    video.style.height = dadoWrapper.clientHeight + "px";
     video.style.zIndex = "10";
-
-    // Quitamos clipPath para que no se vea nada del dado debajo
-    // (antes recortaba 10px a cada lado, ahora queremos que cubra completo)
     video.style.clipPath = "none";
 
     dadoWrapper.appendChild(video);
@@ -308,32 +413,23 @@
     }
   }
 
-  function procesarPuntos(dados) {
-    const { puntos, dadosUtiles } = calcularPuntos(dados);
-    if (puntos === 0) {
-      alert("¡Sin puntos! Turno perdido.");
-      puntosTurno = 0;
-      pasarTurno();
-    } else {
-      puntosTurno += puntos;
-      dadosRestantes = dados.length - dadosUtiles;
-      if (dadosRestantes === 0) dadosRestantes = 6;
-      document.getElementById("puntos-turno").textContent = `Puntos este turno: ${puntosTurno}`;
-    }
-  }
-
-  function calcularPuntos(dados) {
+  // Función mejorada: calcula puntos y además devuelve índices dados puntuados
+  function calcularPuntosConIndices(dados) {
     let contador = [0,0,0,0,0,0,0];
     dados.forEach(d => contador[d]++);
     let puntos = 0;
     let dadosUtiles = 0;
+    let indicesUtiles = [];
 
+    // Escalera 1-6
     if (contador.slice(1).every(c => c === 1)) {
       puntos += 1500;
       dadosUtiles = 6;
-      return { puntos, dadosUtiles };
+      indicesUtiles = [0,1,2,3,4,5];
+      return { puntos, dadosUtiles, indicesUtiles };
     }
 
+    // Tripletas y más
     for (let i = 1; i <= 6; i++) {
       if (contador[i] >= 3) {
         if (i === 1) {
@@ -342,63 +438,83 @@
           puntos += i * 100 * 2**(contador[i]-3);
         }
         dadosUtiles += contador[i];
+
+        // Encontrar índices dados puntuados de ese valor i
+        let encontrados = 0;
+        for(let j = 0; j < dados.length && encontrados < contador[i]; j++) {
+          if(dados[j] === i) {
+            indicesUtiles.push(j);
+            encontrados++;
+          }
+        }
         contador[i] = 0;
       }
     }
 
+    // 1's y 5's sueltos
     if (contador[1] > 0) {
       puntos += contador[1] * 100;
       dadosUtiles += contador[1];
+      let encontrados = 0;
+      for(let j = 0; j < dados.length && encontrados < contador[1]; j++) {
+        if(dados[j] === 1 && !indicesUtiles.includes(j)) {
+          indicesUtiles.push(j);
+          encontrados++;
+        }
+      }
     }
     if (contador[5] > 0) {
       puntos += contador[5] * 50;
       dadosUtiles += contador[5];
+      let encontrados = 0;
+      for(let j = 0; j < dados.length && encontrados < contador[5]; j++) {
+        if(dados[j] === 5 && !indicesUtiles.includes(j)) {
+          indicesUtiles.push(j);
+          encontrados++;
+        }
+      }
     }
 
-    return { puntos, dadosUtiles };
+    return { puntos, dadosUtiles, indicesUtiles };
   }
 
+  // Modificación: procesa puntos y actualiza texto
+  function procesarPuntos(dados) {
+    const { puntos, dadosUtiles } = calcularPuntosConIndices(dados);
+    puntosTurno += puntos;
+    dadosRestantes -= dadosUtiles;
+
+    document.getElementById("puntos-turno").textContent = `Puntos esta tirada: ${puntos} | Dados restantes: ${dadosRestantes}`;
+  }
+
+  // Corrección: sólo clona dados que puntuaron en esta tirada y limpia resultados anteriores
   function moverDadosPuntuados(dados) {
     const resultados = document.getElementById("resultados-tiradas");
 
-    tiradaNumero = (tiradaNumero + 1) % coloresTiradas.length;
-    const claseColor = coloresTiradas[tiradaNumero];
-
-    dadosResaltadosPrevios.forEach(img => {
-      img.classList.remove("resaltado-actual");
-      img.classList.add("resaltado-previo");
-    });
+    // Limpia dados resaltados previos
+    dadosResaltadosPrevios.forEach(clone => clone.remove());
     dadosResaltadosPrevios = [];
 
-    let { dadosUtiles } = calcularPuntos(dados);
-    if (dadosUtiles === 0) return;
+    tiradaNumero++;
+    const colorActual = coloresTiradas[tiradaNumero % coloresTiradas.length];
 
-    const dadosPuntuados = dados.slice(0, dadosUtiles);
+    const { indicesUtiles } = calcularPuntosConIndices(dados);
+
+    if(indicesUtiles.length === 0) {
+      // Si no puntuaron dados, no agregar nada
+      return;
+    }
 
     const contenedorDados = document.getElementById("dados");
 
-    dadosPuntuados.forEach((valor, idx) => {
-      const dadoOriginal = contenedorDados.children[idx].querySelector("img");
-      const rectOriginal = dadoOriginal.getBoundingClientRect();
+    indicesUtiles.forEach(i => {
+      const dadoOriginal = contenedorDados.children[i].querySelector("img");
+      if(!dadoOriginal) return;
 
-      const clone = dadoOriginal.cloneNode();
-      clone.classList.add("dice-result", "resaltado-actual", claseColor);
-
-      clone.style.position = "fixed";
-      clone.style.top = `${rectOriginal.top}px`;
-      clone.style.left = `${rectOriginal.left}px`;
-      clone.style.margin = "0";
-
-      document.body.appendChild(clone);
-
-      setTimeout(() => {
-        resultados.appendChild(clone);
-        clone.style.position = "relative";
-        clone.style.top = "auto";
-        clone.style.left = "auto";
-        clone.style.margin = "0 10px";
-      }, 100);
-
+      // Clonamos el dado para ponerlo en resultados
+      const clone = dadoOriginal.cloneNode(true);
+      clone.className = `dice-result ${colorActual}`;
+      resultados.appendChild(clone);
       dadosResaltadosPrevios.push(clone);
     });
   }
@@ -409,7 +525,12 @@
     puntosTurno = 0;
     dadosRestantes = 6;
 
+    // Limpiar texto y dados y resultados al cambiar turno
     document.getElementById("puntos-turno").textContent = "";
+    document.getElementById("dados").innerHTML = "";
+    document.getElementById("resultados-tiradas").innerHTML = "";
+
+    dadosResaltadosPrevios = [];
 
     pasarTurno();
   }
@@ -417,8 +538,6 @@
   function pasarTurno() {
     turno = (turno + 1) % jugadores;
     mostrarTurno();
-    document.getElementById("dados").innerHTML = "";
-    document.getElementById("puntos-turno").textContent = "";
   }
 </script>
 
