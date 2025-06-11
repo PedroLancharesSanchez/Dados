@@ -176,32 +176,32 @@
     video.style.position = "absolute";
     video.style.top = "0";
     video.style.left = "0";
-    video.style.width = "80px";
-    video.style.height = "80px";
+    video.style.width = "100px";    // ancho aumentado
+    video.style.height = "80px";    // altura igual que dadoWrapper
     video.style.zIndex = "10";
-
-    // Recortar un 8% de cada lado horizontalmente para eliminar marcas negras
-    video.style.clipPath = "inset(0 8% 0 8%)";
-
+  
+    // Recortar 10px a cada lado para que el área visible sea 80px ancho x 80px alto
+    video.style.clipPath = "inset(0 10px 0 10px)";
+  
     dadoWrapper.appendChild(video);
-
+  
     const sonido = new Audio("sounds/lanzar-dados.mp3");
-
+  
     sonido.addEventListener("loadedmetadata", () => {
       if (video.readyState >= 2) {
         ajustarDuracion();
       } else {
         video.addEventListener("loadedmetadata", ajustarDuracion);
       }
-
+  
       function ajustarDuracion() {
-        const nuevaDuracion = sonido.duration - 0.5;
+        const nuevaDuracion = sonido.duration - 2.3;
         video.playbackRate = video.duration / nuevaDuracion;
         video.play().catch(() => {});
         sonido.play().catch(() => {});
       }
     });
-
+  
     video.onended = () => {
       dadoWrapper.removeChild(video);
       if (typeof callback === "function") callback();
