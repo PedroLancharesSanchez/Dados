@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <title>Juego de Dados</title>
   <style>
+    /* Escala general del 80% */
+    html {
+      font-size: 80%;
+    }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -78,15 +83,16 @@
     .p3 { bottom: 0; left: 0; border-bottom-left-radius: 0; }
     .p4 { bottom: 0; right: 0; border-bottom-right-radius: 0; }
 
+    /* Dados en 2 filas, 3 columnas */
     .dice-container {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 30px;
+      width: 560px;
+      display: grid;
+      grid-template-columns: repeat(3, 160px);
+      grid-template-rows: repeat(2, 160px);
+      gap: 30px 20px;
       justify-content: center;
       margin: 40px 0;
       position: relative;
-      height: 200px;
-      width: 1200px;
       z-index: 15;
     }
 
@@ -95,11 +101,10 @@
       height: 160px;
       object-fit: contain;
       border-radius: 20px;
-      position: absolute;
-      top: 0;
-      left: 0;
+      position: relative; /* ya no absoluto para grid */
       transition: box-shadow 0.3s ease;
       user-select: none;
+      overflow: visible;
     }
 
     #turno-actual {
@@ -127,7 +132,7 @@
       display: flex;
       gap: 30px;
       min-height: 200px;
-      width: 1200px;
+      width: 560px;
       flex-wrap: wrap;
       justify-content: center;
       border: 2px solid #333;
@@ -144,8 +149,6 @@
       width: 120px !important;
       height: 120px !important;
       position: relative !important;
-      top: auto !important;
-      left: auto !important;
       box-shadow: 0 0 20px 8px green;
       border-radius: 20px;
       margin: 0 10px;
@@ -168,20 +171,26 @@
       box-shadow: 0 0 30px 8px #2196F3 !important;
     }
 
-    /* Video ajustado para el dado */
+    /* Video ajustado para dado - tamaño 20% mayor que caja */
     video {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 160px;
-      height: 160px;
+      top: -16px;
+      left: -16px;
+      width: 192px; /* 160 * 1.2 */
+      height: 192px;
       z-index: 10;
       clip-path: none;
       user-select: none;
+      pointer-events: none;
+      border-radius: 20px;
     }
 
     /* Responsive móvil */
     @media (max-width: 768px) {
+      html {
+        font-size: 60%;
+      }
+
       body {
         padding: 10px;
       }
@@ -210,20 +219,17 @@
       }
 
       .dice-container {
-        position: relative;
         width: 100%;
-        height: auto;
-        gap: 15px;
+        grid-template-columns: repeat(3, 80px);
+        grid-template-rows: repeat(2, 80px);
+        gap: 15px 10px;
         margin: 20px 0;
-        flex-wrap: wrap;
-        justify-content: center;
-        height: auto;
       }
 
       .dice {
-        position: relative !important;
         width: 80px !important;
         height: 80px !important;
+        position: relative !important;
         top: auto !important;
         left: auto !important;
       }
@@ -255,6 +261,13 @@
       .score.p2 { top: 0; right: 0; }
       .score.p3 { bottom: 0; left: 0; }
       .score.p4 { bottom: 0; right: 0; }
+
+      video {
+        top: -8px;
+        left: -8px;
+        width: 96px;
+        height: 96px;
+      }
     }
   </style>
 </head>
@@ -300,7 +313,6 @@
     document.querySelector(".player-select").style.display = "none";
 
     const posiciones = ["p1", "p2", "p3", "p4"];
-    // Remover marcadores antiguos si existen
     for(let i = 0; i < 4; i++) {
       const old = document.getElementById(`jugador${i}`);
       if(old) old.remove();
@@ -331,13 +343,6 @@
       dadoWrapper.style.width = "160px";
       dadoWrapper.style.height = "160px";
 
-      // En móvil posición relativa, en escritorio absoluta para que no se superpongan
-      if(window.innerWidth > 768) {
-        dadoWrapper.style.position = "absolute";
-        dadoWrapper.style.left = `${idx * 180}px`;
-        dadoWrapper.style.top = `0`;
-      }
-
       const img = document.createElement("img");
       img.src = `img/dice${valor}.png`;
       img.alt = `Dado ${valor}`;
@@ -351,107 +356,60 @@
   function animarDado(dadoWrapper, callback) {
     const video = document.createElement("video");
     video.src = "video/lanzar.mp4";
+    video.autoplay = true;
+    video.loop = false;
     video.muted = true;
+    video.playsInline = true;
     video.style.position = "absolute";
-    video.style.top = "0";
-    video.style.left = "0";
-    video.style.width = dadoWrapper.clientWidth + "px";
-    video.style.height = dadoWrapper.clientHeight + "px";
-    video.style.zIndex = "10";
-    video.style.clipPath = "none";
-
+    video.style.top = "-16px";
+    video.style.left = "-16px";
+    video.style.width = "192px"; // 160 * 1.2
+    video.style.height = "192px";
+    video.style.borderRadius = "20px";
     dadoWrapper.appendChild(video);
 
-    const sonido = new Audio("sounds/lanzar-dados.mp3");
-
-    sonido.addEventListener("loadedmetadata", () => {
-      if (video.readyState >= 2) {
-        ajustarDuracion();
-      } else {
-        video.addEventListener("loadedmetadata", ajustarDuracion);
-      }
-
-      function ajustarDuracion() {
-        const nuevaDuracion = sonido.duration - 2.3;
-        video.playbackRate = video.duration / nuevaDuracion;
-        video.play().catch(() => {});
-        sonido.play().catch(() => {});
-      }
-    });
-
     video.onended = () => {
-      dadoWrapper.removeChild(video);
-      if (typeof callback === "function") callback();
+      video.remove();
+      if (callback) callback();
     };
   }
 
   function lanzarDados() {
-    if (dadosRestantes <= 0) {
-      alert("No quedan dados para lanzar. Plantate o reinicia el turno.");
-      return;
+    if(dadosRestantes <= 0) return;
+
+    let resultados = [];
+    for(let i=0; i<dadosRestantes; i++) {
+      resultados.push(Math.floor(Math.random() * 6) + 1);
     }
-    const cantidad = dadosRestantes;
-    const dados = Array.from({ length: cantidad }, () => Math.floor(Math.random() * 6) + 1);
 
-    const contenedor = document.getElementById("dados");
-    contenedor.style.display = "block";
-    mostrarDados(dados);
+    mostrarDados(resultados);
 
-    let animacionesPendientes = cantidad;
+    // Animar todos los dados y luego procesar puntos y mover dados puntuados
+    const dadosElems = document.querySelectorAll("#dados > div");
+    let animacionesCompletadas = 0;
 
-    for (let i = 0; i < cantidad; i++) {
-      const dadoWrapper = contenedor.children[i];
-      animarDado(dadoWrapper, () => {
-        animacionesPendientes--;
-        if (animacionesPendientes === 0) {
-          setTimeout(() => {
-            procesarPuntos(dados);
-            moverDadosPuntuados(dados);
-          }, 1000);
+    dadosElems.forEach((wrapper, i) => {
+      animarDado(wrapper, () => {
+        animacionesCompletadas++;
+        if(animacionesCompletadas === dadosElems.length) {
+          procesarPuntos(resultados);
+          moverDadosPuntuados(resultados);
+          actualizarPuntosTurno();
         }
       });
-    }
+    });
   }
 
-  // Función mejorada: calcula puntos y además devuelve índices dados puntuados
+  // Función que calcula puntos, dados útiles e índices de dados puntuados
   function calcularPuntosConIndices(dados) {
-    let contador = [0,0,0,0,0,0,0];
-    dados.forEach(d => contador[d]++);
+    const contador = {};
+    dados.forEach(d => contador[d] = (contador[d] || 0) + 1);
+
     let puntos = 0;
     let dadosUtiles = 0;
     let indicesUtiles = [];
 
-    // Escalera 1-6
-    if (contador.slice(1).every(c => c === 1)) {
-      puntos += 1500;
-      dadosUtiles = 6;
-      indicesUtiles = [0,1,2,3,4,5];
-      return { puntos, dadosUtiles, indicesUtiles };
-    }
-
-    // Tripletas y más
-    for (let i = 1; i <= 6; i++) {
-      if (contador[i] >= 3) {
-        if (i === 1) {
-          puntos += (contador[i] === 3) ? 1000 : 1000 * 2**(contador[i]-3);
-        } else {
-          puntos += i * 100 * 2**(contador[i]-3);
-        }
-        dadosUtiles += contador[i];
-
-        // Encontrar índices dados puntuados de ese valor i
-        let encontrados = 0;
-        for(let j = 0; j < dados.length && encontrados < contador[i]; j++) {
-          if(dados[j] === i) {
-            indicesUtiles.push(j);
-            encontrados++;
-          }
-        }
-        contador[i] = 0;
-      }
-    }
-
-    // 1's y 5's sueltos
+    // Ejemplo simple: 1's y 5's suman puntos
     if (contador[1] > 0) {
       puntos += contador[1] * 100;
       dadosUtiles += contador[1];
@@ -478,20 +436,27 @@
     return { puntos, dadosUtiles, indicesUtiles };
   }
 
-  // Modificación: procesa puntos y actualiza texto
+  // Procesar puntos y actualizar texto con puntuación de tirada y total turno
   function procesarPuntos(dados) {
     const { puntos, dadosUtiles } = calcularPuntosConIndices(dados);
     puntosTurno += puntos;
     dadosRestantes -= dadosUtiles;
 
-    document.getElementById("puntos-turno").textContent = `Puntos esta tirada: ${puntos} | Dados restantes: ${dadosRestantes}`;
+    actualizarPuntosTurno();
   }
 
-  // Corrección: sólo clona dados que puntuaron en esta tirada y limpia resultados anteriores
+  // Actualiza el texto con puntos de tirada y total acumulado en el turno
+  function actualizarPuntosTurno() {
+    const elem = document.getElementById("puntos-turno");
+    elem.textContent = `Puntos esta tirada: ${puntosTurno - puntosUltimaTirada} | Total turno: ${puntosTurno} | Dados restantes: ${dadosRestantes}`;
+  }
+
+  let puntosUltimaTirada = 0;
+
+  // Corrección: sólo clona dados que puntuaron en esta tirada y limpia previos
   function moverDadosPuntuados(dados) {
     const resultados = document.getElementById("resultados-tiradas");
 
-    // Limpia dados resaltados previos
     dadosResaltadosPrevios.forEach(clone => clone.remove());
     dadosResaltadosPrevios = [];
 
@@ -500,10 +465,7 @@
 
     const { indicesUtiles } = calcularPuntosConIndices(dados);
 
-    if(indicesUtiles.length === 0) {
-      // Si no puntuaron dados, no agregar nada
-      return;
-    }
+    if(indicesUtiles.length === 0) return;
 
     const contenedorDados = document.getElementById("dados");
 
@@ -511,21 +473,23 @@
       const dadoOriginal = contenedorDados.children[i].querySelector("img");
       if(!dadoOriginal) return;
 
-      // Clonamos el dado para ponerlo en resultados
       const clone = dadoOriginal.cloneNode(true);
       clone.className = `dice-result ${colorActual}`;
       resultados.appendChild(clone);
       dadosResaltadosPrevios.push(clone);
     });
+
+    // Actualizamos puntosUltimaTirada para mostrar diferencia la próxima tirada
+    puntosUltimaTirada = calcularPuntosConIndices(dados).puntos;
   }
 
   function plantarse() {
     puntuaciones[turno] += puntosTurno;
     document.getElementById(`jugador${turno}`).textContent = `Jugador ${turno + 1}: ${puntuaciones[turno]}`;
     puntosTurno = 0;
+    pontosUltimaTirada = 0;
     dadosRestantes = 6;
 
-    // Limpiar texto y dados y resultados al cambiar turno
     document.getElementById("puntos-turno").textContent = "";
     document.getElementById("dados").innerHTML = "";
     document.getElementById("resultados-tiradas").innerHTML = "";
