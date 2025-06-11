@@ -31,6 +31,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      animation: fadeIn 0.5s ease-in;
     }
     .turn {
       background-color: #e0ffe0;
@@ -47,18 +48,35 @@
       font-weight: bold;
       font-size: 2.2em;
     }
+    .dice {
+      animation: bounce 0.5s ease;
+    }
     button {
-      margin: 10px;
-      padding: 20px 40px;
-      font-size: 1.5em;
+      margin: 12px;
+      padding: 25px 60px;
+      font-size: 2em;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       background-color: #444;
       color: white;
       cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s ease;
     }
     button:hover {
       background-color: #666;
+      transform: scale(1.05);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounce {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.2); }
+      60% { transform: scale(0.9); }
+      100% { transform: scale(1); }
     }
   </style>
 </head>
@@ -97,11 +115,18 @@
     function tirar(player) {
       if (player !== turn) return;
 
+      // Reiniciar dados al inicio del turno
+      if (current[player - 1] === 0) dadosRestantes[player - 1] = 6;
+
       const diceCount = Math.max(1, dadosRestantes[player - 1]);
       const dados = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
       const { puntos, usados, win, mensaje } = evaluarTirada(dados);
 
-      document.getElementById(`dice${player}`).textContent = `🎲 ${dados.join(', ')}`;
+      const diceElement = document.getElementById(`dice${player}`);
+      diceElement.textContent = `🎲 ${dados.join(', ')}`;
+      diceElement.classList.remove('dice');
+      void diceElement.offsetWidth; // re-trigger animation
+      diceElement.classList.add('dice');
 
       if (win) {
         alert(`🎉 ¡Jugador ${player} gana automáticamente con 6 dados iguales!`);
@@ -120,16 +145,13 @@
 
       document.getElementById(`score${player}`).textContent = `Turno: ${current[player - 1]}`;
 
-      // Calcular dados restantes
       let restantes = dados.length - usados.length;
       if (restantes === 0) restantes = 6;
       dadosRestantes[player - 1] = restantes;
 
       document.getElementById(`restantes${player}`).textContent = `Dados restantes: ${restantes}`;
 
-      if (mensaje) {
-        alert(mensaje);
-      }
+      if (mensaje) alert(mensaje);
     }
 
     function plantarse(player) {
@@ -146,7 +168,6 @@
         alert(`🎉 ¡Jugador ${player} gana con 10.000 puntos!`);
         resetGame();
       } else {
-        dadosRestantes[player - 1] = 6;
         cambiarTurno();
       }
     }
@@ -154,6 +175,7 @@
     function cambiarTurno() {
       document.getElementById(`player${turn}`).classList.remove("turn");
       turn = 3 - turn;
+      dadosRestantes[turn - 1] = 6;
       document.getElementById(`player${turn}`).classList.add("turn");
     }
 
@@ -183,7 +205,6 @@
       const valores = Object.values(conteo);
       const claves = Object.keys(conteo).map(Number);
 
-      // Combinaciones especiales (solo con 6 dados)
       if (dados.length === 6) {
         const esEscalera = claves.length === 6 && claves.sort().toString() === "1,2,3,4,5,6";
         const esTresParejas = valores.filter(v => v === 2).length === 3;
@@ -213,7 +234,6 @@
         }
       }
 
-      // Unos y cincos individuales
       for (let num of [1, 5]) {
         const count = (conteo[num] || 0) - usados.filter(x => x === num).length;
         if (count > 0) {
