@@ -285,8 +285,9 @@
   <div class="dice-container" id="dados"></div>
 
   <div class="controls" style="display:none;">
-    <button onclick="lanzarDados()">🎲 Lanzar Dados</button>
-    <button onclick="plantarse()">✋ Plantarse</button>
+   <button id="botonTirar" onclick="lanzarDados()">🎲 Lanzar Dados</button>
+   <button id="botonPlantarse" onclick="plantarse()">✋ Plantarse</button>
+
   </div>
 
   <div id="puntos-turno"></div>
@@ -353,6 +354,8 @@
   }
 
   function mostrarDados(valores) {
+    const botonTirar = document.getElementById("botonTirar");
+    const botonPlantarse = document.getElementById("botonPlantarse");
     botonTirar.disabled = false;
     botonPlantarse.disabled = false;
     const contenedor = document.getElementById("dados");
@@ -375,6 +378,8 @@
   }
 
   function animarDado(dadoWrapper, callback) {
+    const botonTirar = document.getElementById("botonTirar");
+    const botonPlantarse = document.getElementById("botonPlantarse");
     botonTirar.disabled = true;
     botonPlantarse.disabled = true;
     const video = document.createElement("video");
