@@ -409,6 +409,11 @@
   }
 
   function lanzarDados() {
+
+    const btn1 = document.getElementById("botonTirar");
+    const btn2 = document.getElementById("botonPlantarse");
+    btn1.disabled = true; // Deshabilitar botón
+    btn2.disabled = true;
     if (dadosRestantes <= 0) {
       dadosRestantes = 6; // Reiniciar dados si se acabaron
     }
@@ -427,6 +432,8 @@
         animacionesPendientes--;
         if (animacionesPendientes === 0) {
           setTimeout(() => {
+            btn1.disabled = false; // Deshabilitar botón
+            btn1.disabled = false;
             procesarTirada(dados);
           }, 1000);
         }
