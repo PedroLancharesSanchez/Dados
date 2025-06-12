@@ -354,10 +354,6 @@
   }
 
   function mostrarDados(valores) {
-    const botonTirar = document.getElementById("botonTirar");
-    const botonPlantarse = document.getElementById("botonPlantarse");
-    botonTirar.disabled = false;
-    botonPlantarse.disabled = false;
     const contenedor = document.getElementById("dados");
     contenedor.innerHTML = "";
 
@@ -414,6 +410,8 @@
       video.remove();
       if (callback) callback();
     };
+    botonTirar.disabled = true;
+    botonPlantarse.disabled = true;
   }
 
   function lanzarDados() {
