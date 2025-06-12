@@ -433,7 +433,7 @@
         if (animacionesPendientes === 0) {
           setTimeout(() => {
             btn1.disabled = false; // Deshabilitar botón
-            btn1.disabled = false;
+            btn2.disabled = false;
             procesarTirada(dados);
           }, 1000);
         }
@@ -632,6 +632,10 @@
     }
   }
   function plantarse() {
+    const btn1 = document.getElementById("botonTirar");
+    const btn2 = document.getElementById("botonPlantarse");
+    btn1.disabled = true; // Deshabilitar botón
+    btn2.disabled = true;
     puntuaciones[turno] += puntosTurno;
 
     // Actualizar marcador
@@ -652,6 +656,10 @@
     document.getElementById("puntos-turno").textContent = "";
 
     mostrarTurno();
+    setTimeout(() => {
+      btn1.disabled = false; // Deshabilitar botón
+      btn2.disabled = false;
+  }, 2000);
   }
 
   function reproducirSonido() {
