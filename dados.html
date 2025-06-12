@@ -374,10 +374,6 @@
   }
 
   function animarDado(dadoWrapper, callback) {
-    const botonTirar = document.getElementById("botonTirar");
-    const botonPlantarse = document.getElementById("botonPlantarse");
-    botonTirar.disabled = true;
-    botonPlantarse.disabled = true;
     const video = document.createElement("video");
     video.src = "video/lanzar.mp4";
     video.currentTime = 0.5;
@@ -410,8 +406,6 @@
       video.remove();
       if (callback) callback();
     };
-    botonTirar.disabled = true;
-    botonPlantarse.disabled = true;
   }
 
   function lanzarDados() {
