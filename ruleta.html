@@ -55,12 +55,13 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform-origin: 0 0;
+      transform-origin: center center;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 20px;
       color: white;
       white-space: nowrap;
       text-shadow: 1px 1px 2px black;
+      text-align: center;
     }
 
     #pointer {
@@ -117,7 +118,7 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Posicionar las etiquetas apuntando hacia el centro de la ruleta
+  // Posicionar las etiquetas apuntando al centro y centradas
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = i * anglePerSlice + anglePerSlice / 2;
@@ -125,9 +126,10 @@
     span.innerText = text;
     span.style.transform = `
       rotate(${angle}deg)
-      translate(0, -220px)
+      translate(0, -200px)
+      translateX(-50%)
     `;
-    span.style.transformOrigin = "0 0";
+    span.style.transformOrigin = "center center";
     labelContainer.appendChild(span);
   });
 
