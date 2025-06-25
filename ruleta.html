@@ -65,9 +65,9 @@
       height: 0;
       border-left: 15px solid transparent;
       border-right: 15px solid transparent;
-      border-bottom: 30px solid yellow;
+      border-top: 30px solid yellow; /* Apunta hacia abajo */
       position: absolute;
-      top: -30px;
+      bottom: -30px;
       left: calc(50% - 15px);
       z-index: 10;
     }
@@ -91,25 +91,28 @@
 <h1>RULETA DEL ALMUERZO</h1>
 
 <div id="wheel-container">
-  <div id="pointer"></div>
   <div id="wheel">
     <div class="label" id="label-container"></div>
   </div>
+  <div id="pointer"></div>
 </div>
 
 <button onclick="tirar()">Tirar</button>
 <div id="resultado"></div>
+
+<audio id="sonido-ruleta" src="sounds/sonido_ruleta.mp3" preload="auto"></audio>
 
 <script>
   const labels = ["Palillo", "Anjana", "Pato", "Calenda", "Mercado", "Zorropito"];
   const wheel = document.getElementById('wheel');
   const labelContainer = document.getElementById('label-container');
   const resultadoDiv = document.getElementById('resultado');
+  const sonido = document.getElementById('sonido-ruleta');
   const slices = labels.length;
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Dibujar textos
+  // Dibujar textos en cada porción
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = anglePerSlice * i;
@@ -120,6 +123,9 @@
   });
 
   function tirar() {
+    sonido.currentTime = 0;
+    sonido.play();
+
     const vueltas = Math.floor(Math.random() * 3) + 5;
     const randomOffset = Math.random() * anglePerSlice;
     const destino = 360 * vueltas + randomOffset;
@@ -127,7 +133,6 @@
     wheel.style.transform = `rotate(${currentRotation}deg)`;
 
     setTimeout(() => {
-      // Obtener rotación actual normalizada
       const rotacionFinal = currentRotation % 360;
       const anguloPuntero = (360 - rotacionFinal) % 360;
       const index = Math.floor(anguloPuntero / anglePerSlice);
