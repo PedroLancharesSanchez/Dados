@@ -32,11 +32,11 @@
       transform: rotate(0deg);
       background: conic-gradient(
         #f44336 0deg 60deg,
-        #ffffff 60deg 120deg,
-        #f44336 120deg 180deg,
-        #ffffff 180deg 240deg,
-        #f44336 240deg 300deg,
-        #ffffff 300deg 360deg
+        #ff9800 60deg 120deg,
+        #ffeb3b 120deg 180deg,
+        #4caf50 180deg 240deg,
+        #2196f3 240deg 300deg,
+        #9c27b0 300deg 360deg
       );
       overflow: hidden;
       box-shadow: 0 0 20px #0006;
@@ -57,10 +57,9 @@
       top: 50%;
       transform-origin: 0 0;
       font-weight: bold;
-      font-size: 18px;
-      color: #003366;
-      white-space: nowrap;
-      text-shadow: 1px 1px 2px #fff;
+      font-size: 20px;
+      color: white;
+      text-shadow: 2px 2px 4px black;
     }
 
     #pointer {
@@ -116,21 +115,21 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Colocar los textos alineados con sus sectores
+  // Colocar textos alineados con los sectores
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = i * anglePerSlice;
     const span = document.createElement("span");
     span.innerText = text;
-    span.style.transform = `rotate(${angle}deg) translateY(-215px) rotate(${-angle}deg)`;
+    span.style.transform = `rotate(${angle}deg) translateY(-220px) rotate(${-angle}deg)`;
     labelContainer.appendChild(span);
   });
 
-  // Generar número aleatorio más variable
+  // Aleatorio con más entropía
   function getRandomFloat() {
     const array = new Uint32Array(1);
     crypto.getRandomValues(array);
-    const entropy = Date.now() % 1000; // más entropía con el reloj
+    const entropy = Date.now() % 1000;
     return ((array[0] + entropy) % 0xffffffff) / 0xffffffff;
   }
 
@@ -138,9 +137,9 @@
     sonido.currentTime = 0;
     sonido.play();
 
-    const vueltas = Math.floor(getRandomFloat() * 4) + 5; // entre 5 y 8 vueltas
+    const vueltas = Math.floor(getRandomFloat() * 15) + 5; // entre 5 y 19
     const offset = getRandomFloat() * anglePerSlice;
-    const destino = 360 * vueltas + offset;
+    const destino = vueltas * 360 + offset;
 
     currentRotation += destino;
     wheel.style.transform = `rotate(${currentRotation}deg)`;
