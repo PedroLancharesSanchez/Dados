@@ -12,7 +12,7 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      background: radial-gradient(#e0e0ff, #003366);
+      background: radial-gradient(#cce0ff, #003366);
       color: white;
     }
 
@@ -31,15 +31,15 @@
       transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
       transform: rotate(0deg);
       background: conic-gradient(
-        #f44336 0deg 60deg,
-        #ff9800 60deg 120deg,
-        #ffeb3b 120deg 180deg,
-        #4caf50 180deg 240deg,
-        #2196f3 240deg 300deg,
-        #9c27b0 300deg 360deg
+        #ff4444 0deg 60deg,
+        #ff9900 60deg 120deg,
+        #ffff66 120deg 180deg,
+        #66cc66 180deg 240deg,
+        #3399ff 240deg 300deg,
+        #9933cc 300deg 360deg
       );
       overflow: hidden;
-      box-shadow: 0 0 20px #0006;
+      box-shadow: 0 0 20px #0008;
     }
 
     .label {
@@ -57,9 +57,10 @@
       top: 50%;
       transform-origin: 0 0;
       font-weight: bold;
-      font-size: 20px;
+      font-size: 18px;
       color: white;
-      text-shadow: 2px 2px 4px black;
+      white-space: nowrap;
+      text-shadow: 1px 1px 2px black;
     }
 
     #pointer {
@@ -70,7 +71,7 @@
       height: 0;
       border-left: 20px solid transparent;
       border-right: 20px solid transparent;
-      border-top: 30px solid gold;
+      border-top: 30px solid yellow;
       z-index: 10;
     }
 
@@ -86,6 +87,7 @@
       font-size: 24px;
       font-weight: bold;
       color: white;
+      text-shadow: 1px 1px 2px black;
     }
   </style>
 </head>
@@ -115,31 +117,33 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Colocar textos alineados con los sectores
+  // Posicionar las etiquetas radialmente centradas
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = i * anglePerSlice;
+    const middleAngle = angle + anglePerSlice / 2;
     const span = document.createElement("span");
     span.innerText = text;
-    span.style.transform = `rotate(${angle}deg) translateY(-220px) rotate(${-angle}deg)`;
+    span.style.transform = `
+      rotate(${middleAngle}deg)
+      translateY(-42%)
+      rotate(-${middleAngle}deg)
+    `;
     labelContainer.appendChild(span);
   });
 
-  // Aleatorio con más entropía
-  function getRandomFloat() {
+  function getRandomFloat(min, max) {
     const array = new Uint32Array(1);
     crypto.getRandomValues(array);
-    const entropy = Date.now() % 1000;
-    return ((array[0] + entropy) % 0xffffffff) / 0xffffffff;
+    return min + (array[0] / 0xffffffff) * (max - min);
   }
 
   function tirar() {
     sonido.currentTime = 0;
     sonido.play();
 
-    const vueltas = Math.floor(getRandomFloat() * 15) + 5; // entre 5 y 19
-    const offset = getRandomFloat() * anglePerSlice;
-    const destino = vueltas * 360 + offset;
+    const vueltas = getRandomFloat(5, 20); // Giro entre 5.0 y 20.0 vueltas
+    const destino = vueltas * 360;
 
     currentRotation += destino;
     wheel.style.transform = `rotate(${currentRotation}deg)`;
@@ -149,7 +153,7 @@
       sonido.currentTime = 0;
 
       const rotacionFinal = currentRotation % 360;
-      const anguloPuntero = (360 - (rotacionFinal % 360)) % 360;
+      const anguloPuntero = (360 - rotacionFinal) % 360;
       const index = Math.floor(anguloPuntero / anglePerSlice);
       resultadoDiv.textContent = "Resultado: " + labels[index];
     }, 5200);
