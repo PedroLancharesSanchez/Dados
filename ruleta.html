@@ -54,10 +54,11 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      transform-origin: 0 0;
+      transform-origin: center left;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 16px;
       color: black;
+      white-space: nowrap;
     }
 
     #pointer {
@@ -65,9 +66,9 @@
       height: 0;
       border-left: 15px solid transparent;
       border-right: 15px solid transparent;
-      border-top: 30px solid yellow; /* Apunta hacia abajo */
+      border-bottom: 30px solid yellow;
       position: absolute;
-      bottom: -30px;
+      top: -28px;
       left: calc(50% - 15px);
       z-index: 10;
     }
@@ -91,10 +92,10 @@
 <h1>RULETA DEL ALMUERZO</h1>
 
 <div id="wheel-container">
+  <div id="pointer"></div>
   <div id="wheel">
     <div class="label" id="label-container"></div>
   </div>
-  <div id="pointer"></div>
 </div>
 
 <button onclick="tirar()">Tirar</button>
@@ -112,13 +113,14 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Dibujar textos en cada porción
+  // Dibujar textos orientados radialmente
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = anglePerSlice * i;
     const span = document.createElement("span");
     span.innerText = text;
-    span.style.transform = `rotate(${angle + anglePerSlice / 2}deg) translateY(-210px) rotate(-${angle + anglePerSlice / 2}deg)`;
+    // texto rotado radialmente y trasladado desde el centro
+    span.style.transform = `rotate(${angle}deg) translateX(100px) rotate(90deg)`;
     labelContainer.appendChild(span);
   });
 
@@ -133,6 +135,9 @@
     wheel.style.transform = `rotate(${currentRotation}deg)`;
 
     setTimeout(() => {
+      sonido.pause();
+      sonido.currentTime = 0;
+
       const rotacionFinal = currentRotation % 360;
       const anguloPuntero = (360 - rotacionFinal) % 360;
       const index = Math.floor(anguloPuntero / anglePerSlice);
