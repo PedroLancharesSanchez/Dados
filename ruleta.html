@@ -109,30 +109,29 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Crear etiquetas posicionadas correctamente
+  // Dibujar textos
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = anglePerSlice * i;
     const span = document.createElement("span");
     span.innerText = text;
-    // Posicionamos a 85% del radio y rotamos para mantener el texto horizontal
     span.style.transform = `rotate(${angle + anglePerSlice / 2}deg) translateY(-210px) rotate(-${angle + anglePerSlice / 2}deg)`;
     labelContainer.appendChild(span);
   });
 
   function tirar() {
     const vueltas = Math.floor(Math.random() * 3) + 5;
-    const extraAngle = Math.random() * anglePerSlice;
-    const destino = 360 * vueltas + extraAngle;
+    const randomOffset = Math.random() * anglePerSlice;
+    const destino = 360 * vueltas + randomOffset;
     currentRotation += destino;
     wheel.style.transform = `rotate(${currentRotation}deg)`;
 
     setTimeout(() => {
-      // Calcular ángulo final ajustado al módulo 360
-      const rotationNormalized = currentRotation % 360;
-      const correctedAngle = (360 - rotationNormalized + anglePerSlice / 2) % 360;
-      const resultado = Math.floor(correctedAngle / anglePerSlice);
-      resultadoDiv.textContent = "Resultado: " + labels[resultado];
+      // Obtener rotación actual normalizada
+      const rotacionFinal = currentRotation % 360;
+      const anguloPuntero = (360 - rotacionFinal) % 360;
+      const index = Math.floor(anguloPuntero / anglePerSlice);
+      resultadoDiv.textContent = "Resultado: " + labels[index];
     }, 5200);
   }
 </script>
