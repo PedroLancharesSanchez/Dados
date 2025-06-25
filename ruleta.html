@@ -116,29 +116,32 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Dibujar textos en el borde, girados radialmente
+  // Colocar los textos alineados con sus sectores
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = i * anglePerSlice;
     const span = document.createElement("span");
     span.innerText = text;
-    span.style.transform = `rotate(${angle + anglePerSlice / 2}deg) translateY(-215px) rotate(90deg)`;
+    span.style.transform = `rotate(${angle}deg) translateY(-215px) rotate(${-angle}deg)`;
     labelContainer.appendChild(span);
   });
 
+  // Generar número aleatorio más variable
   function getRandomFloat() {
     const array = new Uint32Array(1);
     crypto.getRandomValues(array);
-    return array[0] / (0xffffffff + 1);
+    const entropy = Date.now() % 1000; // más entropía con el reloj
+    return ((array[0] + entropy) % 0xffffffff) / 0xffffffff;
   }
 
   function tirar() {
     sonido.currentTime = 0;
     sonido.play();
 
-    const vueltas = Math.floor(getRandomFloat() * 4) + 5;
+    const vueltas = Math.floor(getRandomFloat() * 4) + 5; // entre 5 y 8 vueltas
     const offset = getRandomFloat() * anglePerSlice;
     const destino = 360 * vueltas + offset;
+
     currentRotation += destino;
     wheel.style.transform = `rotate(${currentRotation}deg)`;
 
@@ -147,7 +150,7 @@
       sonido.currentTime = 0;
 
       const rotacionFinal = currentRotation % 360;
-      const anguloPuntero = (360 - rotacionFinal + anglePerSlice / 2) % 360;
+      const anguloPuntero = (360 - (rotacionFinal % 360)) % 360;
       const index = Math.floor(anguloPuntero / anglePerSlice);
       resultadoDiv.textContent = "Resultado: " + labels[index];
     }, 5200);
