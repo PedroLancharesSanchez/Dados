@@ -38,6 +38,7 @@
         #f44336 240deg 300deg,
         #fff 300deg 360deg
       );
+      overflow: hidden;
     }
 
     .label {
@@ -51,12 +52,12 @@
 
     .label span {
       position: absolute;
-      width: 100%;
-      text-align: center;
+      left: 50%;
+      top: 50%;
+      transform-origin: 0 0;
       font-weight: bold;
       font-size: 18px;
       color: black;
-      transform-origin: 50% 250px;
     }
 
     #pointer {
@@ -92,14 +93,7 @@
 <div id="wheel-container">
   <div id="pointer"></div>
   <div id="wheel">
-    <div class="label">
-      <span style="transform: rotate(30deg) translateY(-220px);">Palillo</span>
-      <span style="transform: rotate(90deg) translateY(-220px);">Anjana</span>
-      <span style="transform: rotate(150deg) translateY(-220px);">Pato</span>
-      <span style="transform: rotate(210deg) translateY(-220px);">Calenda</span>
-      <span style="transform: rotate(270deg) translateY(-220px);">Mercado</span>
-      <span style="transform: rotate(330deg) translateY(-220px);">Zorropito</span>
-    </div>
+    <div class="label" id="label-container"></div>
   </div>
 </div>
 
@@ -107,17 +101,27 @@
 <div id="resultado"></div>
 
 <script>
-  const wheel = document.getElementById('wheel');
-  const resultadoDiv = document.getElementById('resultado');
   const labels = ["Palillo", "Anjana", "Pato", "Calenda", "Mercado", "Zorropito"];
+  const wheel = document.getElementById('wheel');
+  const labelContainer = document.getElementById('label-container');
+  const resultadoDiv = document.getElementById('resultado');
   const slices = labels.length;
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
+  // Crear etiquetas dentro de la ruleta
+  labels.forEach((text, i) => {
+    const angle = anglePerSlice * i + anglePerSlice / 2;
+    const span = document.createElement("span");
+    span.innerText = text;
+    span.style.transform = `rotate(${angle}deg) translate(90px) rotate(-${angle}deg)`;
+    labelContainer.appendChild(span);
+  });
+
   function tirar() {
     const vueltas = Math.floor(Math.random() * 3) + 5;
     const resultado = Math.floor(Math.random() * slices);
-    const angulo = resultado * anglePerSlice + anglePerSlice / 2;
+    const angulo = resultado * anglePerSlice;
     const destino = 360 * vueltas - angulo;
 
     currentRotation += destino;
