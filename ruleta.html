@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ruleta 1-6</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    #wheel {
+      margin: 0 auto;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 10px solid #444;
+      position: relative;
+      transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    .slice {
+      width: 50%;
+      height: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 0%;
+      background-color: #eee;
+      border: 1px solid #ccc;
+    }
+
+    .slice span {
+      position: absolute;
+      top: 30%;
+      left: 70%;
+      transform: translate(-50%, -50%) rotate(0deg);
+      font-weight: bold;
+    }
+
+    #pointer {
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 30px solid red;
+      position: absolute;
+      top: -30px;
+      left: calc(50% - 15px);
+      z-index: 10;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Ruleta 1-6</h1>
+
+<div id="pointer"></div>
+<div id="wheel"></div>
+<button onclick="tirar()">Tirar</button>
+
+<script>
+  const wheel = document.getElementById('wheel');
+  const slices = 6;
+  const anglePerSlice = 360 / slices;
+  let currentRotation = 0;
+
+  // Crear los segmentos
+  for (let i = 0; i < slices; i++) {
+    const slice = document.createElement('div');
+    slice.className = 'slice';
+    slice.style.transform = `rotate(${i * anglePerSlice}deg) skewY(${90 - anglePerSlice}deg)`;
+    slice.style.backgroundColor = `hsl(${i * 60}, 70%, 75%)`;
+
+    const label = document.createElement('span');
+    label.innerText = i + 1;
+    label.style.transform = `rotate(${anglePerSlice / 2}deg)`;
+    slice.appendChild(label);
+
+    wheel.appendChild(slice);
+  }
+
+  function tirar() {
+    const vueltas = Math.floor(Math.random() * 3) + 5; // entre 5 y 7 vueltas
+    const resultado = Math.floor(Math.random() * slices); // entre 0 y 5
+    const anguloDestino = 360 * vueltas + (360 - resultado * anglePerSlice) - anglePerSlice / 2;
+
+    currentRotation += anguloDestino;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+    setTimeout(() => {
+      alert("Resultado: " + (resultado + 1));
+    }, 5200); // un poco más que los 5s de transición
+  }
+</script>
+
+</body>
+</html>
