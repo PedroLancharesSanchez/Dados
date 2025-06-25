@@ -53,9 +53,9 @@
 
     .label span {
       position: absolute;
-      left: 50%;
       top: 50%;
-      transform-origin: 0 0;
+      left: 50%;
+      transform-origin: center center;
       font-weight: bold;
       font-size: 18px;
       color: white;
@@ -117,18 +117,22 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Posicionar las etiquetas radialmente centradas
+  // Posicionar las etiquetas radialmente hacia el centro
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
-    const angle = i * anglePerSlice;
-    const middleAngle = angle + anglePerSlice / 2;
+    const angle = i * anglePerSlice + anglePerSlice / 2;
     const span = document.createElement("span");
     span.innerText = text;
     span.style.transform = `
-      rotate(${middleAngle}deg)
-      translateY(-42%)
-      rotate(-${middleAngle}deg)
+      rotate(${angle}deg)
+      translateY(-180px)
+      rotate(-${angle}deg)
     `;
+    span.style.transformOrigin = "center center";
+    span.style.textAlign = "center";
+    span.style.left = "50%";
+    span.style.top = "50%";
+    span.style.position = "absolute";
     labelContainer.appendChild(span);
   });
 
@@ -142,7 +146,7 @@
     sonido.currentTime = 0;
     sonido.play();
 
-    const vueltas = getRandomFloat(5, 20); // Giro entre 5.0 y 20.0 vueltas
+    const vueltas = getRandomFloat(5, 20);
     const destino = vueltas * 360;
 
     currentRotation += destino;
