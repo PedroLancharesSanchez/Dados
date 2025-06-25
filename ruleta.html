@@ -4,17 +4,22 @@
   <meta charset="UTF-8">
   <title>LA RULETA DEL ALMUERZO</title>
   <style>
-    body {
+    html, body {
+      height: 100%;
+      margin: 0;
       font-family: sans-serif;
-      text-align: center;
-      margin-top: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: #003366;
+      color: white;
     }
 
     #wheel-container {
       position: relative;
       width: 300px;
       height: 300px;
-      margin: 0 auto;
     }
 
     #wheel {
@@ -25,25 +30,14 @@
       position: relative;
       transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
       transform: rotate(0deg);
-    }
-
-    .slice {
-      width: 50%;
-      height: 50%;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform-origin: 0% 0%;
-      clip-path: polygon(0 0, 100% 0, 0 100%);
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    .slice span {
-      transform: rotate(-60deg);
-      margin-right: 10px;
-      font-weight: bold;
+      background: conic-gradient(
+        #f44336 0deg 60deg,
+        #fff 60deg 120deg,
+        #f44336 120deg 180deg,
+        #fff 180deg 240deg,
+        #f44336 240deg 300deg,
+        #fff 300deg 360deg
+      );
     }
 
     #pointer {
@@ -51,7 +45,7 @@
       height: 0;
       border-left: 15px solid transparent;
       border-right: 15px solid transparent;
-      border-bottom: 30px solid red;
+      border-bottom: 30px solid yellow;
       position: absolute;
       top: -30px;
       left: calc(50% - 15px);
@@ -59,7 +53,7 @@
     }
 
     button {
-      margin-top: 20px;
+      margin-top: 30px;
       padding: 10px 20px;
       font-size: 18px;
       cursor: pointer;
@@ -74,7 +68,7 @@
 </head>
 <body>
 
-<h1>Ruleta 1-6</h1>
+<h1>Ruleta 1–6</h1>
 
 <div id="wheel-container">
   <div id="pointer"></div>
@@ -91,25 +85,11 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Crear los segmentos
-  for (let i = 0; i < slices; i++) {
-    const slice = document.createElement('div');
-    slice.className = 'slice';
-    slice.style.backgroundColor = `hsl(${i * 60}, 70%, 75%)`;
-    slice.style.transform = `rotate(${i * anglePerSlice}deg)`;
-
-    const label = document.createElement('span');
-    label.innerText = i + 1;
-    slice.appendChild(label);
-
-    wheel.appendChild(slice);
-  }
-
   function tirar() {
     const vueltas = Math.floor(Math.random() * 3) + 5; // entre 5 y 7 vueltas
     const resultado = Math.floor(Math.random() * slices); // entre 0 y 5
     const angulo = resultado * anglePerSlice + anglePerSlice / 2;
-    const destino = 360 * vueltas - angulo; // Resta el ángulo para que el resultado quede bajo el puntero
+    const destino = 360 * vueltas - angulo;
 
     currentRotation += destino;
     wheel.style.transform = `rotate(${currentRotation}deg)`;
