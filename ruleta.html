@@ -51,13 +51,20 @@
       pointer-events: none;
     }
 
-    .label span {
+    .word {
       position: absolute;
       top: 50%;
       left: 50%;
       transform-origin: center center;
+    }
+
+    .letter {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
       font-weight: bold;
-      font-size: 20px;
+      font-size: 22px;
       color: white;
       white-space: nowrap;
       text-shadow: 1px 1px 2px black;
@@ -118,19 +125,33 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Posicionar las etiquetas apuntando al centro y centradas
+  // Crear etiquetas con letras perfectamente centradas radialmente
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
-    const angle = i * anglePerSlice + anglePerSlice / 2;
-    const span = document.createElement("span");
-    span.innerText = text;
-    span.style.transform = `
-      rotate(${angle}deg)
-      translate(0, -200px)
-      translateX(-50%)
-    `;
-    span.style.transformOrigin = "center center";
-    labelContainer.appendChild(span);
+    const baseAngle = i * anglePerSlice;
+    const group = document.createElement("div");
+    group.className = "word";
+    const totalLetters = text.length;
+    const spacing = 14; // grados entre letras
+    const offset = (totalLetters - 1) / 2;
+
+    for (let j = 0; j < totalLetters; j++) {
+      const angleOffset = (j - offset) * spacing;
+      const totalAngle = baseAngle + anglePerSlice / 2 + angleOffset;
+
+      const letter = document.createElement("span");
+      letter.className = "letter";
+      letter.innerText = text[j];
+      letter.style.transform = `
+        rotate(${totalAngle}deg)
+        translateY(-200px)
+        rotate(${-totalAngle}deg)
+      `;
+
+      group.appendChild(letter);
+    }
+
+    labelContainer.appendChild(group);
   });
 
   function getRandomFloat(min, max) {
