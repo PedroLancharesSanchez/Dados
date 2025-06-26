@@ -172,7 +172,7 @@
       const anguloPuntero = (360 - rotacionFinal) % 360;
       const index = Math.floor(anguloPuntero / anglePerSlice);
 
-      resultadoDiv.textContent = "Resultado: " + labels[index];
+      resultadoDiv.textContent = "Hoy se almuerza en el " + labels[index];
       resultadoDiv.classList.add("brillo");
     }, 5200);
   }
