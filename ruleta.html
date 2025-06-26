@@ -153,29 +153,30 @@
   }
 
   function tirar() {
+  sonido.currentTime = 0;
+  sonido.play();
+
+  resultadoDiv.classList.remove("brillo");
+
+  const vueltas = getRandomFloat(5, 20);
+  const destino = vueltas * 360;
+  currentRotation += destino;
+  wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+  setTimeout(() => {
+    sonido.pause();
     sonido.currentTime = 0;
-    sonido.play();
 
-    // Quitar brillo previo
-    resultadoDiv.classList.remove("brillo");
+    const rotacionFinal = currentRotation % 360;
+    
+    // 🧠 Ajustamos para que el triángulo esté alineado con el centro del primer sector
+    const anguloPuntero = (360 - rotacionFinal + anglePerSlice / 2) % 360;
+    const index = Math.floor(anguloPuntero / anglePerSlice) % slices;
 
-    const vueltas = getRandomFloat(5, 20);
-    const destino = vueltas * 360;
-    currentRotation += destino;
-    wheel.style.transform = `rotate(${currentRotation}deg)`;
-
-    setTimeout(() => {
-      sonido.pause();
-      sonido.currentTime = 0;
-
-      const rotacionFinal = currentRotation % 360;
-      const anguloPuntero = (360 - rotacionFinal) % 360;
-      const index = Math.floor(anguloPuntero / anglePerSlice);
-
-      resultadoDiv.textContent = "Hoy se almuerza en el " + labels[index];
-      resultadoDiv.classList.add("brillo");
-    }, 5200);
-  }
+    resultadoDiv.textContent = "Hoy se almuerza en el " + labels[index];
+    resultadoDiv.classList.add("brillo");
+  }, 5200);
+}
 </script>
 
 </body>
