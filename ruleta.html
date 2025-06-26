@@ -55,9 +55,9 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform-origin: center center;
+      transform-origin: 0 0;
       font-weight: bold;
-      font-size: 24px;
+      font-size: 20px;
       color: white;
       white-space: nowrap;
       text-shadow: 1px 1px 2px black;
@@ -84,10 +84,24 @@
 
     #resultado {
       margin-top: 20px;
-      font-size: 24px;
+      font-size: 28px;
       font-weight: bold;
       color: white;
       text-shadow: 1px 1px 2px black;
+    }
+
+    /* Efecto de brillo para el texto ganador */
+    .brillo {
+      animation: glow 1s infinite alternate;
+    }
+
+    @keyframes glow {
+      0% {
+        text-shadow: 0 0 5px #fff, 0 0 10px #ff0, 0 0 15px #ff0;
+      }
+      100% {
+        text-shadow: 0 0 10px #fff, 0 0 20px #ff0, 0 0 30px #ff0;
+      }
     }
   </style>
 </head>
@@ -117,18 +131,16 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Añadir etiquetas radialmente centradas
+  // Añadir etiquetas con dirección radial (desde el centro hacia fuera)
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = i * anglePerSlice + anglePerSlice / 2;
     const span = document.createElement("span");
     span.innerText = text;
 
-    // Radial: gira al centro, luego aleja, luego invierte para que se lea hacia fuera
     span.style.transform = `
       rotate(${angle}deg)
-      translateY(-210px)
-      rotate(-${angle}deg)
+      translateX(100px)
     `;
 
     labelContainer.appendChild(span);
@@ -144,7 +156,10 @@
     sonido.currentTime = 0;
     sonido.play();
 
-    const vueltas = getRandomFloat(5, 20); // más aleatorio
+    // Quitar brillo previo
+    resultadoDiv.classList.remove("brillo");
+
+    const vueltas = getRandomFloat(5, 20);
     const destino = vueltas * 360;
     currentRotation += destino;
     wheel.style.transform = `rotate(${currentRotation}deg)`;
@@ -156,7 +171,9 @@
       const rotacionFinal = currentRotation % 360;
       const anguloPuntero = (360 - rotacionFinal + anglePerSlice / 2) % 360;
       const index = Math.floor(anguloPuntero / anglePerSlice);
+
       resultadoDiv.textContent = "Resultado: " + labels[index];
+      resultadoDiv.classList.add("brillo");
     }, 5200);
   }
 </script>
