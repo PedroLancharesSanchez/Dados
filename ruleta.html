@@ -140,27 +140,34 @@
   }
 
   function tirar() {
+  sonido.currentTime = 0;
+  sonido.play();
+  resultadoDiv.classList.remove("brillo");
+
+  const ganadorIndex = getRandomInt(0, slices);
+  const vueltas = getRandomInt(5, 10);
+  
+  // Ángulo para alinear el centro del sector ganador con el puntero (0°)
+  const anguloGanador = ganadorIndex * anglePerSlice + anglePerSlice / 2;
+
+  // Calcular rotación total: vueltas completas + rotación necesaria para alinear el sector
+  const rotacionTotal = vueltas * 360 - anguloGanador;
+
+  // Aplicar rotación
+  wheel.style.transform = `rotate(${rotacionTotal}deg)`;
+
+  setTimeout(() => {
+    sonido.pause();
     sonido.currentTime = 0;
-    sonido.play();
-    resultadoDiv.classList.remove("brillo");
 
-    const ganadorIndex = getRandomInt(0, slices);  // Elegimos aleatoriamente el índice
-    const vueltas = getRandomInt(5, 10);
-    const rotationToAlign = 360 * vueltas + (360 - (ganadorIndex * anglePerSlice + anglePerSlice / 2));
+    const ganador = labels[ganadorIndex];
+    resultadoDiv.textContent = "Hoy se almuerza en el " + ganador;
+    resultadoDiv.classList.add("brillo");
 
-    wheel.style.transform = `rotate(${rotationToAlign}deg)`;
+    console.log(`Ganador: ${ganador} (índice ${ganadorIndex}) → Ángulo: ${rotacionTotal}°`);
+  }, 5200);
+}
 
-    setTimeout(() => {
-      sonido.pause();
-      sonido.currentTime = 0;
-
-      const ganador = labels[ganadorIndex];
-      resultadoDiv.textContent = "Hoy se almuerza en el " + ganador;
-      resultadoDiv.classList.add("brillo");
-
-      console.log(`Ganador: ${ganador} (índice ${ganadorIndex})`);
-    }, 5200);
-  }
 </script>
 
 </body>
