@@ -170,7 +170,7 @@
     const rotacionFinal = currentRotation % 360;
     
     // 🧠 Ajustamos para que el triángulo esté alineado con el centro del primer sector
-    const anguloPuntero = (360 - rotacionFinal - 180 + anglePerSlice / 2) % 360;
+    const anguloPuntero = (360 - rotacionFinal - 90 + anglePerSlice / 2) % 360;
     const index = Math.floor(anguloPuntero / anglePerSlice) % slices;
 
     resultadoDiv.textContent = "Hoy se almuerza en el " + labels[index];
