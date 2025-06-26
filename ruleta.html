@@ -130,19 +130,13 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Dibujar etiquetas rotadas hacia afuera
+  // Añadir etiquetas radiales
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = i * anglePerSlice + anglePerSlice / 2;
     const span = document.createElement("span");
     span.innerText = text;
-
-    span.style.transform = `
-      rotate(${angle}deg)
-      translateX(100px)
-      rotate(${-angle}deg)
-    `;
-
+    span.style.transform = `rotate(${angle}deg) translateX(100px)`;
     labelContainer.appendChild(span);
   });
 
@@ -168,8 +162,8 @@
       sonido.currentTime = 0;
 
       const rotacionFinal = currentRotation % 360;
-      const anguloPuntero = (360 - rotacionFinal) % 360;
-      const index = Math.floor(anguloPuntero / anglePerSlice);
+      const anguloPuntero = (360 - rotacionFinal + 0.00001) % 360;  // Añadimos un pequeño margen para evitar errores en el borde
+      const index = Math.floor(anguloPuntero / anglePerSlice) % slices;
 
       resultadoDiv.textContent = "Hoy se almuerza en el " + labels[index];
       resultadoDiv.classList.add("brillo");
