@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>RULETA DEL ALMUERZO</title>
   <style>
     html, body {
@@ -124,9 +124,8 @@
   const sonido = document.getElementById('sonido-ruleta');
   const slices = labels.length;
   const anglePerSlice = 360 / slices;
-  let currentRotation = 0;
 
-  // Añadir etiquetas sin rotarlas
+  // Crear etiquetas
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = i * anglePerSlice + anglePerSlice / 2;
@@ -136,37 +135,32 @@
     labelContainer.appendChild(span);
   });
 
-  function getRandomFloat(min, max) {
-    const array = new Uint32Array(1);
-    crypto.getRandomValues(array);
-    return min + (array[0] / 0xffffffff) * (max - min);
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
   }
 
   function tirar() {
-  sonido.currentTime = 0;
-  sonido.play();
-  resultadoDiv.classList.remove("brillo");
-
-  const vueltas = getRandomFloat(5, 10);
-  const destino = vueltas * 360;
-  currentRotation += destino;
-  wheel.style.transform = `rotate(${currentRotation}deg)`;
-
-  setTimeout(() => {
-    sonido.pause();
     sonido.currentTime = 0;
+    sonido.play();
+    resultadoDiv.classList.remove("brillo");
 
-    const rotacionFinal = currentRotation % 360;
-    const anguloBajoPuntero = rotacionFinal % 360;
-    const index = Math.floor(((anguloBajoPuntero + anglePerSlice / 2) % 360) / anglePerSlice);
-    const ganador = labels[index];
+    const ganadorIndex = getRandomInt(0, slices);  // Elegimos aleatoriamente el índice
+    const vueltas = getRandomInt(5, 10);
+    const rotationToAlign = 360 * vueltas + (360 - (ganadorIndex * anglePerSlice + anglePerSlice / 2));
 
-    resultadoDiv.textContent = "Hoy se almuerza en el " + ganador;
-    resultadoDiv.classList.add("brillo");
+    wheel.style.transform = `rotate(${rotationToAlign}deg)`;
 
-    console.log(`Ángulo final: ${rotacionFinal.toFixed(2)}° → Index: ${index} → ${ganador}`);
-  }, 5200);
-}
+    setTimeout(() => {
+      sonido.pause();
+      sonido.currentTime = 0;
+
+      const ganador = labels[ganadorIndex];
+      resultadoDiv.textContent = "Hoy se almuerza en el " + ganador;
+      resultadoDiv.classList.add("brillo");
+
+      console.log(`Ganador: ${ganador} (índice ${ganadorIndex})`);
+    }, 5200);
+  }
 </script>
 
 </body>
