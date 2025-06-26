@@ -157,7 +157,7 @@
     sonido.currentTime = 0;
 
     const rotacionFinal = currentRotation % 360;
-    const anguloBajoPuntero = (360 - rotacionFinal) % 360;
+    const anguloBajoPuntero = rotacionFinal % 360;
     const index = Math.floor(((anguloBajoPuntero + anglePerSlice / 2) % 360) / anglePerSlice);
     const ganador = labels[index];
 
@@ -167,7 +167,6 @@
     console.log(`Ángulo final: ${rotacionFinal.toFixed(2)}° → Index: ${index} → ${ganador}`);
   }, 5200);
 }
-
 </script>
 
 </body>
