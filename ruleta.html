@@ -83,8 +83,8 @@
     }
 
     #resultado {
-      margin-top: 20px;
-      font-size: 28px;
+      margin-top: 24px;
+      font-size: 32px;
       font-weight: bold;
       color: white;
       text-shadow: 1px 1px 2px black;
@@ -169,7 +169,7 @@
       sonido.currentTime = 0;
 
       const rotacionFinal = currentRotation % 360;
-      const anguloPuntero = (360 - rotacionFinal + anglePerSlice / 2) % 360;
+      const anguloPuntero = (360 - rotacionFinal) % 360;
       const index = Math.floor(anguloPuntero / anglePerSlice);
 
       resultadoDiv.textContent = "Resultado: " + labels[index];
