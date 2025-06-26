@@ -146,14 +146,13 @@
 
   const ganadorIndex = getRandomInt(0, slices);
   const vueltas = getRandomInt(5, 10);
-  
-  // Ángulo para alinear el centro del sector ganador con el puntero (0°)
-  const anguloGanador = ganadorIndex * anglePerSlice + anglePerSlice / 2;
 
-  // Calcular rotación total: vueltas completas + rotación necesaria para alinear el sector
-  const rotacionTotal = vueltas * 360 - anguloGanador;
+  // Ángulo central del sector que queremos alinear con el puntero (posición 0°)
+  const anguloCentroSector = ganadorIndex * anglePerSlice + anglePerSlice / 2;
 
-  // Aplicar rotación
+  // Calculamos la rotación total: sentido horario → negativo
+  const rotacionTotal = -(vueltas * 360 + anguloCentroSector);
+
   wheel.style.transform = `rotate(${rotacionTotal}deg)`;
 
   setTimeout(() => {
