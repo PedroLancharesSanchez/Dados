@@ -57,7 +57,7 @@
       left: 50%;
       transform-origin: 0 0;
       font-weight: bold;
-      font-size: 22px;
+      font-size: 24px;
       color: white;
       white-space: nowrap;
       text-shadow: 1px 1px 2px black;
@@ -118,21 +118,22 @@
 
 <script>
   const labels = ["Zorropito", "Palillo", "Anjana", "Pato", "Calenda", "Mercado"];
-  const wheel = document.getElementById('wheel');
-  const labelContainer = document.getElementById('label-container');
-  const resultadoDiv = document.getElementById('resultado');
-  const sonido = document.getElementById('sonido-ruleta');
   const slices = labels.length;
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Añadir etiquetas radialmente
+  const wheel = document.getElementById('wheel');
+  const labelContainer = document.getElementById('label-container');
+  const resultadoDiv = document.getElementById('resultado');
+  const sonido = document.getElementById('sonido-ruleta');
+
+  // Añadir etiquetas sin girarlas (que queden rectas)
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = i * anglePerSlice + anglePerSlice / 2;
     const span = document.createElement("span");
     span.innerText = text;
-    span.style.transform = `rotate(${angle}deg) translateX(120px) rotate(90deg)`;
+    span.style.transform = `rotate(${angle}deg) translateX(120px)`;
     labelContainer.appendChild(span);
   });
 
@@ -156,9 +157,10 @@
       sonido.pause();
       sonido.currentTime = 0;
 
+      // Cálculo corregido de ganador
       const rotacionFinal = currentRotation % 360;
-      const anguloPuntero = (360 - rotacionFinal + 360) % 360;
-      const index = Math.floor((anguloPuntero + anglePerSlice / 2) % 360 / anglePerSlice);
+      const anguloBajoPuntero = (360 - rotacionFinal + 360) % 360;
+      const index = Math.floor(anguloBajoPuntero / anglePerSlice) % slices;
       const ganador = labels[index];
 
       resultadoDiv.textContent = "Hoy se almuerza en el " + ganador;
