@@ -147,11 +147,8 @@
   const ganadorIndex = getRandomInt(0, slices);
   const vueltas = getRandomInt(5, 10);
 
-  // Ángulo central del sector que queremos alinear con el puntero (posición 0°)
-  const anguloCentroSector = ganadorIndex * anglePerSlice + anglePerSlice / 2;
-
-  // Calculamos la rotación total: sentido horario → negativo
-  const rotacionTotal = -(vueltas * 360 + anguloCentroSector);
+  const centroSector = ganadorIndex * anglePerSlice + anglePerSlice / 2;
+  const rotacionTotal = vueltas * 360 + (360 - centroSector);
 
   wheel.style.transform = `rotate(${rotacionTotal}deg)`;
 
@@ -163,7 +160,7 @@
     resultadoDiv.textContent = "Hoy se almuerza en el " + ganador;
     resultadoDiv.classList.add("brillo");
 
-    console.log(`Ganador: ${ganador} (índice ${ganadorIndex}) → Ángulo: ${rotacionTotal}°`);
+    console.log(`Ganador: ${ganador} → índice: ${ganadorIndex} → rotación: ${rotacionTotal}°`);
   }, 5200);
 }
 
