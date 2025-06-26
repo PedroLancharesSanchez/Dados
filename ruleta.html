@@ -57,7 +57,7 @@
       left: 50%;
       transform-origin: 0 0;
       font-weight: bold;
-      font-size: 20px;
+      font-size: 22px;
       color: white;
       white-space: nowrap;
       text-shadow: 1px 1px 2px black;
@@ -95,12 +95,8 @@
     }
 
     @keyframes glow {
-      0% {
-        text-shadow: 0 0 5px #fff, 0 0 10px #ff0, 0 0 15px #ff0;
-      }
-      100% {
-        text-shadow: 0 0 10px #fff, 0 0 20px #ff0, 0 0 30px #ff0;
-      }
+      0% { text-shadow: 0 0 5px #fff, 0 0 10px #ff0; }
+      100% { text-shadow: 0 0 10px #fff, 0 0 20px #ff0; }
     }
   </style>
 </head>
@@ -121,7 +117,7 @@
 <audio id="sonido-ruleta" src="sounds/sonido_ruleta.mp3" preload="auto"></audio>
 
 <script>
-  const labels = ["Palillo", "Anjana", "Pato", "Calenda", "Mercado", "Zorropito"];
+  const labels = ["Zorropito", "Palillo", "Anjana", "Pato", "Calenda", "Mercado"];
   const wheel = document.getElementById('wheel');
   const labelContainer = document.getElementById('label-container');
   const resultadoDiv = document.getElementById('resultado');
@@ -130,13 +126,13 @@
   const anglePerSlice = 360 / slices;
   let currentRotation = 0;
 
-  // Añadir etiquetas radiales
+  // Añadir etiquetas radialmente
   labelContainer.innerHTML = "";
   labels.forEach((text, i) => {
     const angle = i * anglePerSlice + anglePerSlice / 2;
     const span = document.createElement("span");
     span.innerText = text;
-    span.style.transform = `rotate(${angle}deg) translateX(100px)`;
+    span.style.transform = `rotate(${angle}deg) translateX(120px) rotate(90deg)`;
     labelContainer.appendChild(span);
   });
 
@@ -149,7 +145,6 @@
   function tirar() {
     sonido.currentTime = 0;
     sonido.play();
-
     resultadoDiv.classList.remove("brillo");
 
     const vueltas = getRandomFloat(5, 10);
@@ -162,10 +157,11 @@
       sonido.currentTime = 0;
 
       const rotacionFinal = currentRotation % 360;
-      const anguloPuntero = (360 - rotacionFinal + 0.00001) % 360;  // Añadimos un pequeño margen para evitar errores en el borde
-      const index = Math.floor(anguloPuntero / anglePerSlice) % slices;
+      const anguloPuntero = (360 - rotacionFinal + 360) % 360;
+      const index = Math.floor((anguloPuntero + anglePerSlice / 2) % 360 / anglePerSlice);
+      const ganador = labels[index];
 
-      resultadoDiv.textContent = "Hoy se almuerza en el " + labels[index];
+      resultadoDiv.textContent = "Hoy se almuerza en el " + ganador;
       resultadoDiv.classList.add("brillo");
     }, 5200);
   }
