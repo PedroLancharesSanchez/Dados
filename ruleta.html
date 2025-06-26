@@ -143,30 +143,31 @@
   }
 
   function tirar() {
+  sonido.currentTime = 0;
+  sonido.play();
+  resultadoDiv.classList.remove("brillo");
+
+  const vueltas = getRandomFloat(5, 10);
+  const destino = vueltas * 360;
+  currentRotation += destino;
+  wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+  setTimeout(() => {
+    sonido.pause();
     sonido.currentTime = 0;
-    sonido.play();
-    resultadoDiv.classList.remove("brillo");
 
-    const vueltas = getRandomFloat(5, 10);
-    const destino = vueltas * 360;
-    currentRotation += destino;
-    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    const rotacionFinal = currentRotation % 360;
+    const anguloBajoPuntero = (360 - rotacionFinal) % 360;
+    const index = Math.floor(((anguloBajoPuntero + anglePerSlice / 2) % 360) / anglePerSlice);
+    const ganador = labels[index];
 
-    setTimeout(() => {
-      sonido.pause();
-      sonido.currentTime = 0;
+    resultadoDiv.textContent = "Hoy se almuerza en el " + ganador;
+    resultadoDiv.classList.add("brillo");
 
-      const rotacionFinal = currentRotation % 360;
-      const anguloBajoPuntero = (360 - rotacionFinal) % 360;
-      const index = Math.floor(anguloBajoPuntero / anglePerSlice);
-      const ganador = labels[index];
+    console.log(`Ángulo final: ${rotacionFinal.toFixed(2)}° → Index: ${index} → ${ganador}`);
+  }, 5200);
+}
 
-      resultadoDiv.textContent = "Hoy se almuerza en el " + ganador;
-      resultadoDiv.classList.add("brillo");
-
-      console.log(`Ángulo final: ${rotacionFinal.toFixed(2)}° → Index: ${index} → ${ganador}`);
-    }, 5200);
-  }
 </script>
 
 </body>
